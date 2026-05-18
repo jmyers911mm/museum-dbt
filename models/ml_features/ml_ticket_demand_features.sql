@@ -62,5 +62,8 @@ SELECT
         THEN ROUND((daily_reserved - reserved_30d_avg) / reserved_30d_stddev, 2)
         ELSE 0
     END AS demand_z_score,
+    MIN(daily_reserved) OVER (PARTITION BY ticket_type ORDER BY entry_date ROWS BETWEEN 29 PRECEDING AND CURRENT ROW) AS forecast_min_30d,
+    MAX(daily_reserved) OVER (PARTITION BY ticket_type ORDER BY entry_date ROWS BETWEEN 29 PRECEDING AND CURRENT ROW) AS forecast_max_30d,
+    ROUND(AVG(daily_reserved) OVER (PARTITION BY ticket_type ORDER BY entry_date ROWS BETWEEN 29 PRECEDING AND CURRENT ROW), 2) AS forecast_mean_30d,
     CURRENT_TIMESTAMP() AS _feature_computed_at
 FROM with_features

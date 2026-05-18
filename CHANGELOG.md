@@ -2,6 +2,20 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [1.5.0] - 2026-05-18
+
+### ML Feature Enhancement
+
+**Modified** (1 file)
+- `models/ml_features/ml_ticket_demand_features.sql` — added 30-day rolling forecast columns partitioned by ticket type: `forecast_min_30d`, `forecast_max_30d`, `forecast_mean_30d`
+
+### Documentation & Recovery
+
+**Recreated** (1 file)
+- `README.md` — comprehensive project documentation with table of contents, architecture diagram, full model lineage (upstream/downstream), testing strategy, access control policies, CI/CD pipeline, and deployment instructions
+
+---
+
 ## [1.4.0] - 2026-05-18
 
 ### Ticket Capacity & Availability Pipeline
