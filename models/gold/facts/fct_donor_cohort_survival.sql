@@ -3,8 +3,7 @@
         materialized='table',
         schema='GOLD',
         cluster_by=['months_since_acquisition'],
-        tags=['daily', 'critical'],
-        group='donor_retention'
+        tags=['daily', 'critical']
     )
 }}
 

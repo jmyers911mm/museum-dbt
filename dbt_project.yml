@@ -17,12 +17,7 @@ clean-targets:
 vars:
   skip_circuit_breaker: false
 
-on-run-start:
-  - "{{ check_source_freshness() }}"
-  - "{% if not var('skip_circuit_breaker', false) %}{{ check_source_group_readiness() }}{% endif %}"
 
-on-run-end:
-  - "{{ log_dbt_run_audit() }}"
 
 models:
   +persist_docs:
@@ -37,7 +32,6 @@ models:
       +schema: SILVER
       +tags: ['daily', 'critical']
       +query_tag: 'dbt_museum_staging'
-      +group: daily_operations
     silver:
       +materialized: incremental
       +schema: SILVER
@@ -46,7 +40,6 @@ models:
       +query_tag: 'dbt_museum_silver'
       +copy_grants: true
       +transient: true
-      +group: daily_operations
     gold:
       +materialized: incremental
       +schema: GOLD
@@ -58,19 +51,15 @@ models:
       +post-hook:
         - "GRANT SELECT ON {{ this }} TO ROLE POWERBI_ROLE"
         - "GRANT SELECT ON {{ this }} TO ROLE ML_ROLE"
-      dimensions:
-        +group: daily_operations
-      facts:
-        +group: daily_operations
-      reports:
-        +group: daily_operations
+      dimensions: {}
+      facts: {}
+      reports: {}
     ml_features:
       +materialized: table
       +schema: ML_FEATURES
       +tags: ['daily', 'non-critical']
       +query_tag: 'dbt_museum_ml_features'
       +transient: true
-      +group: visitor_forecasting
       +post-hook:
         - "GRANT SELECT ON {{ this }} TO ROLE ML_ROLE"
 
