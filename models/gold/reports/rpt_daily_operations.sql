@@ -1,0 +1,25 @@
+SELECT
+    ops.visit_date,
+    dd.day_name,
+    dd.month_name,
+    dd.year_num,
+    dd.fiscal_year,
+    dd.fiscal_quarter,
+    dd.is_weekend,
+    ops.total_visitors,
+    ops.ticket_transactions,
+    ops.tickets_sold,
+    ops.ticket_revenue,
+    ops.ticket_discounts,
+    ops.retail_transactions,
+    ops.retail_items_sold,
+    ops.retail_revenue,
+    ops.retail_discounts,
+    ops.total_revenue,
+    ops.retail_revenue_per_visitor,
+    ops.identified_ticket_buyers,
+    ops.valid_scans,
+    ops.rejected_scans,
+    ops.gates_active
+FROM {{ ref('fct_daily_operations') }} ops
+LEFT JOIN {{ ref('dim_date') }} dd ON ops.visit_date = dd.date_day
