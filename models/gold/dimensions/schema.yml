@@ -1,0 +1,173 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Date dimension table spanning 2025-2027 with fiscal year calculations (July fiscal start)
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: date_day
+        description: Calendar date - primary key
+        data_type: DATE
+        tests:
+          - unique
+          - not_null
+      - name: year_num
+        data_type: NUMBER
+      - name: quarter_num
+        data_type: NUMBER
+      - name: month_num
+        data_type: NUMBER
+      - name: month_name
+        data_type: VARCHAR
+      - name: week_of_year
+        data_type: NUMBER
+      - name: day_of_week_num
+        data_type: NUMBER
+      - name: day_name
+        data_type: VARCHAR
+      - name: day_of_month
+        data_type: NUMBER
+      - name: day_of_year
+        data_type: NUMBER
+      - name: is_weekend
+        description: Boolean flag for Saturday/Sunday
+        data_type: BOOLEAN
+        tests:
+          - not_null
+      - name: fiscal_year
+        description: Fiscal year label (FY starts July 1)
+        data_type: VARCHAR
+        tests:
+          - not_null
+      - name: fiscal_quarter
+        data_type: NUMBER
+      - name: is_today
+        data_type: BOOLEAN
+      - name: days_ago
+        data_type: NUMBER
+
+  - name: dim_ticket_type
+    description: Ticket type dimension with pricing tiers and visitor categories
+    columns:
+      - name: ticket_type_id
+        description: Ticket type identifier
+        tests:
+          - unique
+          - not_null
+      - name: visitor_category
+        tests:
+          - not_null
+      - name: pricing_tier
+        tests:
+          - accepted_values:
+              values: ['Standard', 'Concession', 'Membership', 'Group', 'Package']
+
+  - name: dim_member
+    description: Member dimension with current attributes from CRM - incremental SCD1
+    meta:
+      owner: Membership & Development Team
+      contains_pii: true
+      data_classification: confidential
+    columns:
+      - name: contact_id
+        description: Salesforce contact ID
+        tests:
+          - unique
+          - not_null
+      - name: email
+        tests:
+          - not_null
+          - unique
+      - name: membership_status
+        tests:
+          - not_null
+
+  - name: dim_gate
+    description: Museum gate/entrance dimension with location metadata
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: gate_id
+        description: Gate identifier
+        data_type: VARCHAR
+        tests:
+          - unique
+          - not_null
+      - name: gate_name
+        data_type: VARCHAR
+        tests:
+          - not_null
+      - name: location
+        data_type: VARCHAR
+      - name: is_members_only
+        data_type: BOOLEAN
+      - name: is_primary_entrance
+        data_type: BOOLEAN
+
+  - name: dim_payment_method
+    description: Payment method dimension with electronic/cash categorization
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: payment_method_id
+        description: Payment method identifier
+        data_type: VARCHAR
+        tests:
+          - unique
+          - not_null
+      - name: payment_method_name
+        data_type: VARCHAR
+      - name: payment_category
+        data_type: VARCHAR
+        tests:
+          - accepted_values:
+              values: ['Card', 'Cash', 'Digital', 'Other']
+      - name: is_electronic
+        data_type: BOOLEAN
+
+  - name: dim_product
+    description: Gift shop product dimension with price tiers and product groups
+    columns:
+      - name: product_id
+        description: Product SKU
+        data_type: VARCHAR
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        data_type: VARCHAR
+        tests:
+          - not_null
+      - name: category
+        data_type: VARCHAR
+      - name: standard_price
+        data_type: NUMBER(10,2)
+      - name: price_tier
+        data_type: VARCHAR
+        tests:
+          - accepted_values:
+              values: ['Premium', 'Mid-Range', 'Value']
+      - name: product_group
+        data_type: VARCHAR
+      - name: _loaded_at
+        data_type: TIMESTAMP_LTZ
+
+  - name: dim_campaign
+    description: Email campaign dimension with campaign type classification
+    columns:
+      - name: campaign_id
+        description: Campaign identifier
+        tests:
+          - unique
+          - not_null
+      - name: campaign_name
+        tests:
+          - not_null
+      - name: campaign_type
+        tests:
+          - accepted_values:
+              values: ['Membership', 'Fundraising', 'Newsletter', 'Retail Promotion', 'Exhibition Promotion', 'General']
