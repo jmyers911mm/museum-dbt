@@ -1,0 +1,20 @@
+SELECT
+    m.contact_id,
+    m.full_name,
+    m.email,
+    m.membership_type,
+    m.computed_membership_status,
+    m.donor_tier,
+    m.donation_total_ytd,
+    m.days_since_last_visit,
+    m.ticket_purchase_count,
+    m.total_ticket_spend,
+    m.retail_purchase_count,
+    m.total_retail_spend,
+    m.total_pos_spend,
+    m.total_lifetime_value,
+    m.email_opens,
+    m.email_clicks,
+    m.engagement_segment,
+    m.last_interaction_date
+FROM {{ ref('fct_member_360') }} m
