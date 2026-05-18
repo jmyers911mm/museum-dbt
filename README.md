@@ -37,6 +37,8 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 - [Governance](#governance)
 - [Contributing](#contributing)
 
+- [Model Lineage](#model-lineage)
+
 ---
 
 ## Architecture
@@ -503,3 +505,106 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Summary:
 4. Push and open a PR — CI will run slim builds
 5. Get review, merge to `main`
 6. Deploy to prod via `CREATE DBT PROJECT`
+
+---
+
+## Model Lineage
+
+### Full DAG Overview
+
+```
+BRONZE SOURCES          STAGING              SILVER                    GOLD                         ML FEATURES / REPORTS
+──────────────          ───────              ──────                    ────                         ─────────────────────
+
+raw_pos_tickets    →  stg_pos_tickets    →  silver_pos_tickets    →  fct_daily_operations      →  rpt_daily_operations
+                                                                  →  fct_ticket_utilization        ml_daily_visitor_features
+                                                                  →  dim_ticket_type
+                                                                  →  dim_payment_method
+
+raw_pos_retail     →  stg_pos_retail     →  silver_pos_retail     →  fct_daily_operations      →  rpt_retail_performance
+                                                                  →  fct_retail_performance    →  fct_monthly_retail
+                                                                  →  dim_product
+                                                                  →  dim_payment_method
+
+raw_sf_crm         →  stg_sf_crm        →  silver_sf_crm         →  fct_member_360            →  rpt_member_360
+                                          → snap_sf_crm           →  fct_donor_retention           ml_donor_churn_features
+                                                                  →  fct_donor_cohort_survival     ml_member_churn_features
+                                                                  →  dim_member
+
+raw_sf_marketing   →  stg_sf_marketing   →  silver_sf_marketing   →  fct_campaign_performance  →  rpt_campaign_performance
+_cloud                _cloud                _cloud                →  dim_campaign
+
+raw_ticket_scans   →  stg_ticket_scans   →  silver_ticket_scans   →  fct_daily_operations      →  rpt_visitor_traffic
+                                                                  →  fct_visitor_traffic           ml_daily_visitor_features
+                                                                  →  fct_ticket_utilization
+                                                                  →  dim_gate
+
+raw_ticket_        →  stg_ticket_        →  silver_ticket_        →  fct_ticket_availability   →  fct_ticket_demand_benchmarks
+capacity              capacity              inventory                                              ml_ticket_demand_features
+```
+
+### Per-Model Lineage (Upstream → Model → Downstream)
+
+#### Staging
+| Model | Upstream (Source) | Downstream |
+|-------|-------------------|------------|
+| `stg_pos_tickets` | `bronze.raw_pos_tickets` | silver_pos_tickets |
+| `stg_pos_retail` | `bronze.raw_pos_retail` | silver_pos_retail |
+| `stg_sf_crm` | `bronze.raw_sf_crm` | silver_sf_crm, snap_sf_crm |
+| `stg_sf_marketing_cloud` | `bronze.raw_sf_marketing_cloud` | silver_sf_marketing_cloud |
+| `stg_ticket_scans` | `bronze.raw_ticket_scans` | silver_ticket_scans |
+| `stg_ticket_capacity` | `bronze.raw_ticket_capacity` | silver_ticket_inventory |
+
+#### Silver
+| Model | Upstream | Downstream |
+|-------|----------|------------|
+| `silver_pos_tickets` | stg_pos_tickets | fct_daily_operations, fct_ticket_utilization, dim_ticket_type, dim_payment_method |
+| `silver_pos_retail` | stg_pos_retail | fct_daily_operations, fct_retail_performance, dim_product, dim_payment_method |
+| `silver_sf_crm` | stg_sf_crm | fct_member_360, fct_donor_retention, fct_donor_cohort_survival, dim_member, ml_donor_churn_features |
+| `silver_sf_marketing_cloud` | stg_sf_marketing_cloud | fct_campaign_performance |
+| `silver_ticket_scans` | stg_ticket_scans | fct_daily_operations, fct_visitor_traffic, fct_ticket_utilization, dim_gate |
+| `silver_ticket_inventory` | stg_ticket_capacity, stg_pos_tickets | fct_ticket_availability |
+
+#### Gold Dimensions
+| Model | Upstream | Downstream |
+|-------|----------|------------|
+| `dim_date` | (generated) | fct_monthly_operations, fct_monthly_retail, fct_ticket_availability, fct_donor_retention, fct_donor_cohort_survival, ml_daily_visitor_features, ml_ticket_demand_features, all rpt_* models |
+| `dim_campaign` | fct_campaign_performance | (terminal — consumed by BI tools) |
+| `dim_gate` | silver_ticket_scans | (terminal — consumed by BI tools) |
+| `dim_member` | silver_sf_crm | (terminal — consumed by BI tools) |
+| `dim_payment_method` | silver_pos_tickets, silver_pos_retail | (terminal — consumed by BI tools) |
+| `dim_product` | silver_pos_retail | (terminal — consumed by BI tools) |
+| `dim_ticket_type` | silver_pos_tickets | (terminal — consumed by BI tools) |
+
+#### Gold Facts
+| Model | Upstream | Downstream |
+|-------|----------|------------|
+| `fct_daily_operations` | silver_pos_tickets, silver_ticket_scans, silver_pos_retail | fct_monthly_operations, rpt_daily_operations, ml_daily_visitor_features |
+| `fct_monthly_operations` | fct_daily_operations, dim_date | (terminal — BI) |
+| `fct_visitor_traffic` | silver_ticket_scans | rpt_visitor_traffic, ml_daily_visitor_features |
+| `fct_retail_performance` | silver_pos_retail | fct_monthly_retail, rpt_retail_performance |
+| `fct_monthly_retail` | fct_retail_performance, dim_date | (terminal — BI) |
+| `fct_ticket_utilization` | silver_pos_tickets, silver_ticket_scans | (terminal — BI) |
+| `fct_ticket_availability` | silver_ticket_inventory, dim_date | fct_ticket_demand_benchmarks, ml_ticket_demand_features |
+| `fct_ticket_demand_benchmarks` | fct_ticket_availability | (terminal — Snowflake ML FORECAST input) |
+| `fct_campaign_performance` | silver_sf_marketing_cloud | dim_campaign, rpt_campaign_performance |
+| `fct_member_360` | silver_sf_crm, silver_pos_tickets, silver_pos_retail, silver_sf_marketing_cloud | rpt_member_360, ml_donor_churn_features, ml_member_churn_features |
+| `fct_donor_retention` | silver_sf_crm, dim_date | (terminal — BI) |
+| `fct_donor_cohort_survival` | silver_sf_crm, dim_date | (terminal — BI) |
+
+#### ML Features
+| Model | Upstream | Downstream / Output Target |
+|-------|----------|---------------------------|
+| `ml_daily_visitor_features` | fct_daily_operations, fct_visitor_traffic, dim_date | → `ML_FEATURES.ml_daily_visitor_features` → Snowflake ML FORECAST (visitor predictions) |
+| `ml_ticket_demand_features` | fct_ticket_availability, dim_date | → `ML_FEATURES.ml_ticket_demand_features` → Snowflake ML FORECAST (ticket demand predictions) |
+| `ml_donor_churn_features` | fct_member_360, silver_sf_crm | → `ML_FEATURES.ml_donor_churn_features` → Classification model (donor churn) |
+| `ml_member_churn_features` | fct_member_360 | → `ML_FEATURES.ml_member_churn_features` → Classification model (member churn risk) |
+
+#### Reports (output to Power BI / Snowsight)
+| Model | Upstream | Output Table |
+|-------|----------|--------------|
+| `rpt_daily_operations` | fct_daily_operations, dim_date | → `GOLD.rpt_daily_operations` |
+| `rpt_visitor_traffic` | fct_visitor_traffic, dim_date | → `GOLD.rpt_visitor_traffic` |
+| `rpt_retail_performance` | fct_retail_performance, dim_date | → `GOLD.rpt_retail_performance` |
+| `rpt_campaign_performance` | fct_campaign_performance | → `GOLD.rpt_campaign_performance` |
+| `rpt_member_360` | fct_member_360 | → `GOLD.rpt_member_360` |
