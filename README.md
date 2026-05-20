@@ -2,7 +2,7 @@
 
 A production dbt project for the Museum Data Warehouse on Snowflake. Transforms raw bronze-layer data into analytics-ready silver, gold, and ML feature tables powering operations dashboards, member engagement, retail performance, and ticket demand forecasting.
 
-**Current state:** 40 models | 6 sources | 252+ tests | 1 snapshot | 3 macros
+**Current state:** 45 models | 7 sources | 170 tests | 1 snapshot | 2 semantic views | 3 macros
 
 ---
 
@@ -61,6 +61,13 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 │       │                                      │                           │
 │       ▼                                      ▼                           │
 │  Snowflake ML FORECAST          Power BI / Snowsight Dashboards         │
+│                                      │                           │
+│                                      ▼                           │
+│                          SEMANTIC VIEWS (Cortex Analyst / PBI)    │
+│                      ┌─────────────────────────────────────┐      │
+│                      │ SV_MUSEUM_OPERATIONS (13 entities)  │      │
+│                      │ SV_DONOR_RETENTION   (6 entities)   │      │
+│                      └─────────────────────────────────────┘      │
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -73,6 +80,88 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 - **Fiscal year logic** uses July start (museum fiscal calendar)
 - **Transient tables** for Silver and ML Features (no Time Travel overhead)
 - **Copy grants** enabled for Silver and Gold (preserves downstream access)
+- **Identity resolution** via graph-based customer matching (shared email OR phone = same customer)
+- **Role-playing dates** on ticket sales (transaction_date vs scan_date)
+- **Semantic views** for Cortex Analyst and Power BI Semantic Views connector
+
+---
+
+## Identity Resolution
+
+The `dim_customer` model implements graph-based identity resolution to unify customers across disconnected systems (POS, CRM, email marketing).
+
+### Problem
+
+A single person can appear as:
+- A CRM contact with email + phone
+- A ticket buyer identified only by email
+- A retail shopper identified only by phone
+- Multiple transactions with different email/phone combinations
+
+### Approach: Connected Components via Shared Identifiers
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    IDENTITY RESOLUTION GRAPH                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Transaction A          Transaction B          CRM Record         │
+│  email: j@museum.org    phone: 212-555-1234    email: j@museum   │
+│  phone: 212-555-1234                           phone: 212-555-   │
+│        │                       │                1234             │
+│        └───────┐   ┌──────────┘                   │             │
+│                ▼   ▼                               │             │
+│         ┌──────────────┐                           │             │
+│         │ SHARED PHONE │◄──────────────────────────┘             │
+│         └──────────────┘                                         │
+│                │                                                  │
+│                ▼                                                  │
+│     ┌─────────────────────┐                                      │
+│     │  SINGLE CUSTOMER_ID │  (MD5 hash of earliest email)        │
+│     │  customer_id: abc123│                                      │
+│     │  emails: [j@museum] │                                      │
+│     │  phones: [212-555-] │                                      │
+│     └─────────────────────┘                                      │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Rules
+
+1. **Same email** across any two transactions → same customer
+2. **Same phone** across any two transactions → same customer
+3. **Transitive:** If A shares an email with B, and B shares a phone with C → A, B, C are all the same customer
+4. **CRM enrichment:** If resolved customer matches a CRM email → inherit membership, donor tier, and contact preferences
+
+### Data Flow
+
+```
+BRONZE.RAW_CUSTOMER_IDENTIFIERS   ← All emails + phones from CRM, POS tickets, POS retail
+        │
+        ▼
+GOLD.DIM_CUSTOMER                 ← Resolved: one row per customer_id
+        │                            Columns: customer_id, crm_contact_id, emails[], phones[],
+        │                            membership_type, customer_segment
+        ▼
+FCT_TICKET_SALES.CUSTOMER_ID     ← Joined via primary_email OR primary_phone
+FCT_RETAIL_LINE_ITEMS.CUSTOMER_ID ← Same join logic
+RPT_CUSTOMER_LTV.CUSTOMER_ID     ← Unified LTV across both channels
+```
+
+### Customer Segments
+
+| Segment | Definition |
+|---------|-----------|
+| Known Member | Resolved customer matches a CRM contact_id |
+| Identified Visitor | Has email or phone but no CRM match |
+| Anonymous | No identifiers captured (cash transactions, no email/phone) |
+
+### Multi-Value Support
+
+`DIM_CUSTOMER` stores arrays of all known identifiers:
+- `EMAILS` (ARRAY) — all email addresses associated with this customer
+- `PHONES` (ARRAY) — all phone numbers associated with this customer
+- `EMAIL_COUNT` / `PHONE_COUNT` — number of distinct identifiers
 
 ---
 
@@ -132,12 +221,13 @@ Defined in `models/staging/sources.yml`:
 
 | Source | Table | Description |
 |--------|-------|-------------|
-| bronze | `raw_pos_tickets` | POS ticket sales (574+ rows) |
-| bronze | `raw_pos_retail` | Gift shop/retail transactions |
+| bronze | `raw_pos_tickets` | POS ticket sales with phone, ticket_number, payment_method_id (574+ rows) |
+| bronze | `raw_pos_retail` | Gift shop/retail with phone, product_id, payment_method_id |
 | bronze | `raw_sf_crm` | Salesforce CRM contacts |
 | bronze | `raw_sf_marketing_cloud` | Email campaign events |
 | bronze | `raw_ticket_scans` | Gate entry scan logs |
 | bronze | `raw_ticket_capacity` | Capacity by date/window/type (19,200 rows) |
+| bronze | `raw_customer_identifiers` | Identity graph linking customers via email and phone across systems |
 
 All sources have:
 - `not_null` and `unique` tests on primary keys
@@ -188,10 +278,11 @@ All sources have:
 | `silver_ticket_scans` | scan_date/scan_hour extraction, is_valid_scan derivation |
 | `silver_ticket_inventory` | Capacity vs reservations join, utilization %, demand level classification |
 
-### Gold Dimensions (7 models)
+### Gold Dimensions (8 models)
 
 | Model | Grain | Key Attributes |
 |-------|-------|----------------|
+| `dim_customer` | 1 row per resolved customer | Identity-resolved via email/phone graph. Supports multiple emails/phones. Segments: Known Member, Identified Visitor, Anonymous |
 | `dim_date` | 1 row per day (2025-2027) | Fiscal year/quarter (July start), is_weekend, is_today, days_ago |
 | `dim_campaign` | 1 row per campaign | Campaign type (Membership/Fundraising/Newsletter/Retail/Exhibition), audience size tier |
 | `dim_gate` | 1 row per gate | Gate name, location, is_members_only, is_primary_entrance |
@@ -200,32 +291,36 @@ All sources have:
 | `dim_product` | 1 row per SKU | Category, price tier (Premium/Mid-Range/Value), product group |
 | `dim_ticket_type` | 1 row per ticket type | Visitor category, pricing tier, is_free_admission, is_special_exhibition |
 
-### Gold Facts (12 models)
+### Gold Facts (14 models)
 
 | Model | Grain | Key Metrics |
 |-------|-------|-------------|
+| `fct_ticket_sales` | **1 row per ticket barcode** | customer_id, payment_method_id, ticket_type, transaction_date + scan_date (role-playing), utilization_status, minutes_purchase_to_entry |
+| `fct_retail_line_items` | **1 row per retail line item** | customer_id, product_id, payment_method_id, discount_pct |
 | `fct_daily_operations` | 1 row per day | total_visitors, ticket/retail revenue, discounts, scans, gates_active |
 | `fct_monthly_operations` | 1 row per fiscal month | Monthly aggregations, revenue_per_visitor, peak_day_visitors |
 | `fct_visitor_traffic` | 1 row per date+hour+gate | visitors_admitted, valid/rejected scans, valid_scan_rate_pct |
 | `fct_retail_performance` | 1 row per date+category | transaction_count, items_sold, gross/net revenue, discount_rate_pct |
 | `fct_monthly_retail` | 1 row per month+category | Monthly retail rollups, avg_daily_revenue, avg_items_per_transaction |
-| `fct_ticket_utilization` | 1 row per ticket | was_scanned, visitors_admitted, utilization_status (Used/Unused/Rejected) |
+| `fct_ticket_utilization` | 1 row per ticket (legacy) | was_scanned, visitors_admitted, utilization_status (superseded by fct_ticket_sales) |
 | `fct_ticket_availability` | 1 row per capacity slot | Utilization %, demand level, remaining capacity |
 | `fct_ticket_demand_benchmarks` | 1 row per benchmark | 90-day rolling avg/median/p25/p75/p90 with ±2σ bounds |
 | `fct_campaign_performance` | 1 row per campaign | open/click/bounce/unsubscribe rates, unique recipients |
 | `fct_member_360` | 1 row per contact | Unified view: tickets + retail + donations + email engagement |
-| `fct_donor_retention` | 1 row per cohort+month | retention_rate_pct, churn_rate_pct by cohort month |
-| `fct_donor_cohort_survival` | 1 row per cohort+period | Survival analysis with cohort sizing |
+| `fct_donor_retention` | 1 row per cohort+month+segment | retention_rate_pct, churn_rate_pct by cohort month, membership type, donor tier |
+| `fct_donor_cohort_survival` | 1 row per cohort+period | Survival analysis with half-life detection and cohort health scoring |
 
-### Gold Reports (5 models)
+### Gold Reports (7 models)
 
-Pre-joined views optimized for dashboard consumption (joins facts to dim_date):
+Pre-joined views optimized for dashboard consumption with full dimension attributes:
 
-- `rpt_daily_operations` — Operations: revenue, visitors, scans with day/fiscal context
-- `rpt_visitor_traffic` — Traffic: hourly gate patterns with weekend flag
-- `rpt_retail_performance` — Retail: category performance with fiscal context
-- `rpt_campaign_performance` — Campaign: email metrics passthrough
-- `rpt_member_360` — Members: full 360 view passthrough
+- `rpt_daily_operations` — Operations: revenue, visitors, AOV, net revenue, revenue per visitor with fiscal context
+- `rpt_visitor_traffic` — Traffic: hourly gate patterns with dim_gate attributes + ticket utilization per gate
+- `rpt_retail_performance` — Retail: line-item level with dim_product, dim_payment_method, dim_customer joins
+- `rpt_campaign_performance` — Campaign: metrics with dim_campaign type/tier + dim_date fiscal context
+- `rpt_member_360` — Members: identity-resolved with ticket + retail spend from new fact tables, LTV tier
+- `rpt_customer_ltv` — **NEW:** Unified LTV (tickets + retail + donations) with tier (Platinum/Gold/Silver/Bronze), tenure, avg spend
+- `rpt_ticket_sales` — **NEW:** Full star-schema tickets with role-playing dates, all dim attributes joined
 
 ### ML Features (4 models)
 
@@ -471,6 +566,35 @@ snow dbt deploy --project-dir . --connection prod
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+---
+
+## Semantic Views
+
+Two semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
+
+### `MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS`
+
+Day-to-day operations, revenue, and customer analytics.
+
+- **13 entities:** ticket_sales, retail_items, campaigns, daily_ops, traffic, customer_ltv, dates, customers, dim_gate, dim_campaign, dim_ticket_type, dim_product, dim_payment_method
+- **16 relationships** including role-playing dates (transaction_date + scan_date → dates)
+- **35 metrics** with formatting hints (USD/percentage/count)
+- **6 verified queries**
+- **Identity resolution:** customers merged by shared email OR phone
+- **Cross-entity LTV:** tickets + retail share customer_id
+
+### `MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION`
+
+Donor lifecycle analytics and ticket capacity planning.
+
+- **6 entities:** retention, survival, availability, benchmarks, dates, dim_ticket_type
+- **16 metrics** covering retention rates, survival curves, capacity utilization, demand benchmarks
+- **4 verified queries**
+
+### Access
+
+Both views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views connector.
 
 ---
 
