@@ -32,6 +32,9 @@ SELECT
     cashier_id,
     terminal_id,
     LOWER(TRIM(customer_email)) AS customer_email,
+    TRIM(customer_phone) AS customer_phone,
+    ticket_number,
+    payment_method_id,
     _loaded_at,
     {{ generate_hashdiff([
         'ticket_type', 'entry_time_purchased', 'quantity', 'unit_price', 'total_amount',

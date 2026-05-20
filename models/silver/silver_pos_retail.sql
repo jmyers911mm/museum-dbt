@@ -15,6 +15,10 @@ SELECT
     cashier_id,
     terminal_id,
     customer_email,
+    customer_phone,
+    CASE WHEN customer_phone IS NOT NULL THEN TRUE ELSE FALSE END AS has_phone,
+    product_id,
+    payment_method_id,
     hashdiff,
     _loaded_at
 FROM {{ ref('stg_pos_retail') }}

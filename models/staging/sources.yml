@@ -152,6 +152,20 @@ sources:
             tests:
               - not_null
 
+      - name: raw_customer_identifiers
+        description: Identity graph linking customers across systems via email and phone
+        columns:
+          - name: source_system
+            description: System that provided this identifier (CRM, POS_TICKETS, POS_RETAIL)
+          - name: source_id
+            description: Original ID from source system
+          - name: identifier_type
+            description: Type of identifier (EMAIL, PHONE)
+          - name: identifier_value
+            description: The identifier value
+          - name: is_primary
+            description: Whether this is the primary identifier for this source record
+
       - name: raw_ticket_capacity
         description: Ticket capacity configuration per date, 30-minute entry window, and ticket type
         columns:

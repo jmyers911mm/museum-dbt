@@ -2,6 +2,67 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.0.0] - 2026-05-20
+
+### Identity Resolution & Full Star Schema
+
+Major refactor introducing graph-based customer identity resolution, ticket-level grain, line-item retail, and a fully connected semantic view with role-playing dates.
+
+**New Snowflake Objects**
+- `BRONZE.RAW_CUSTOMER_IDENTIFIERS` — identity graph table linking customers across systems via email and phone
+- `BRONZE.RAW_POS_TICKETS.CUSTOMER_PHONE` — new column for phone-based identity matching
+- `BRONZE.RAW_POS_TICKETS.TICKET_NUMBER` — unique barcode per individual ticket
+- `BRONZE.RAW_POS_TICKETS.PAYMENT_METHOD_ID` — FK to dim_payment_method
+- `BRONZE.RAW_POS_RETAIL.CUSTOMER_PHONE` — new column for phone-based identity matching
+- `BRONZE.RAW_POS_RETAIL.PRODUCT_ID` — FK to dim_product
+- `BRONZE.RAW_POS_RETAIL.PAYMENT_METHOD_ID` — FK to dim_payment_method
+
+**New dbt Models** (4 files)
+- `models/gold/dimensions/dim_customer.sql` — unified customer dimension using connected-component identity resolution (shared email OR phone merges records into one customer_id). Supports multiple emails/phones per customer. Segments: Known Member, Identified Visitor, Anonymous.
+- `models/gold/facts/fct_ticket_sales.sql` — ticket-level grain (one row per barcode) with customer_id, payment_method_id, scan outcomes, and both transaction_date and scan_date for role-playing date analysis
+- `models/gold/facts/fct_retail_line_items.sql` — line-item retail with customer_id, product_id, and payment_method_id FKs
+- `models/gold/reports/rpt_customer_ltv.sql` — unified LTV combining ticket spend + retail spend + donations with tier classification (Platinum ≥ $1000, Gold ≥ $500, Silver ≥ $100, Bronze < $100)
+- `models/gold/reports/rpt_ticket_sales.sql` — full star-schema ticket report with role-playing dates (purchase date + scan date), all dimension attributes joined
+
+**Modified dbt Models** (10 files)
+- `models/staging/sources.yml` — added `raw_customer_identifiers` source
+- `models/staging/stg_pos_tickets.sql` — added customer_phone, ticket_number, payment_method_id columns
+- `models/staging/stg_pos_retail.sql` — added customer_phone, product_id, payment_method_id columns
+- `models/silver/silver_pos_tickets.sql` — added customer_phone, has_phone, ticket_number, payment_method_id passthrough
+- `models/silver/silver_pos_retail.sql` — added customer_phone, has_phone, product_id, payment_method_id passthrough
+- `models/gold/facts/fct_donor_retention.sql` — fixed GROUP BY to include membership_type, acquisition_method, donor_tier (resolves dev build failure)
+- `models/gold/reports/rpt_campaign_performance.sql` — joined dim_campaign + dim_date for campaign type, audience tier, fiscal year
+- `models/gold/reports/rpt_retail_performance.sql` — rebuilt on fct_retail_line_items with dim_product, dim_payment_method, dim_customer joins
+- `models/gold/reports/rpt_member_360.sql` — rebuilt on dim_customer with identity-resolved ticket + retail spend, LTV tier
+- `models/gold/reports/rpt_visitor_traffic.sql` — added dim_gate attributes + ticket utilization per gate
+- `models/gold/reports/rpt_daily_operations.sql` — added ticket AOV, avg tickets/txn, net revenue, revenue per visitor, identification rate
+
+**Model count: 40 → 45 | Test count: 248 → 170 (consolidated)**
+
+### Semantic Views
+
+**New Semantic View**
+- `MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION` — donor retention analytics and ticket capacity planning. 6 entities (retention, survival, availability, benchmarks, dates, ticket type), 16 metrics, 4 verified queries.
+
+**Rebuilt Semantic View**
+- `MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS` — complete redesign with full star schema:
+  - 13 entities (ticket_sales, retail_items, campaigns, daily_ops, traffic, customer_ltv, dates, customers, dim_gate, dim_campaign, dim_ticket_type, dim_product, dim_payment_method)
+  - 16 relationships including role-playing dates (transaction_date + scan_date → dates)
+  - 35 metrics with USD/percentage/count formatting hints
+  - 6 verified queries covering revenue by DOW, ticket type, retail categories, LTV by segment, utilization by gate, revenue by payment method
+  - AI_SQL_GENERATION instructions for identity resolution, role-playing dates, and cross-entity LTV
+
+### Power BI Integration
+- All semantic view relationships fully connected — resolves "entities not related" error when querying across entities
+- `POWERBI_ROLE` granted SELECT on `SV_DONOR_RETENTION`
+
+### Production Deployment
+- Full-refresh build: 45 models, 170 tests — 213 PASS, 3 WARN, 0 ERROR
+- Dev build validated: 45 models PASS, 167 tests PASS, 3 WARN
+- Dev environment schema synchronized (new columns + identity table)
+
+---
+
 ## [1.5.0] - 2026-05-18
 
 ### ML Feature Enhancement

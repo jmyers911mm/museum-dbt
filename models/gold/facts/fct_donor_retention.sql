@@ -46,6 +46,9 @@ SELECT
     cohort_month,
     months_since_acquisition,
     observation_month,
+    membership_type,
+    acquisition_method,
+    donor_tier,
     COUNT(DISTINCT contact_id) AS cohort_size,
     COUNT(DISTINCT CASE
         WHEN last_donation_date >= observation_month
@@ -66,4 +69,4 @@ SELECT
         THEN contact_id
     END)::FLOAT / NULLIF(COUNT(DISTINCT contact_id), 0) * 100, 2) AS churn_rate_pct
 FROM donor_months
-GROUP BY cohort_month, months_since_acquisition, observation_month
+GROUP BY cohort_month, months_since_acquisition, observation_month, membership_type, acquisition_method, donor_tier

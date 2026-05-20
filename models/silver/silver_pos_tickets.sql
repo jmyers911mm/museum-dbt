@@ -23,6 +23,10 @@ SELECT
     terminal_id,
     customer_email,
     CASE WHEN customer_email IS NOT NULL THEN TRUE ELSE FALSE END AS has_email,
+    customer_phone,
+    CASE WHEN customer_phone IS NOT NULL THEN TRUE ELSE FALSE END AS has_phone,
+    ticket_number,
+    payment_method_id,
     hashdiff,
     _loaded_at
 FROM {{ ref('stg_pos_tickets') }}
