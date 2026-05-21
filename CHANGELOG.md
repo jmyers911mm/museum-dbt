@@ -2,6 +2,51 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.1.0] - 2026-05-21
+
+### Cortex Agent, Observability & Verified Query Framework
+
+**Cortex Agent**
+- Recreated `MUSEUM_DW_PROD.GOLD.MUSEUM_OPERATIONS_AGENT` with two semantic view tools:
+  - `MUSEUM_OPERATIONS_DATA` → `SV_MUSEUM_OPERATIONS` (daily ops, tickets, retail, customers, LTV)
+  - `DONOR_RETENTION_DATA` → `SV_DONOR_RETENTION` (retention, survival, capacity)
+- Agent instructions include role-playing date guidance, LTV routing, and chart generation
+- Granted `READ UNREDACTED AI OBSERVABILITY EVENTS TABLE` and `SNOWFLAKE.AI_OBSERVABILITY_READER` for full query tracking
+
+**Observability & Pattern Detection**
+- Created `MUSEUM_DW_PROD.MONITORING.AGENT_QUESTION_PATTERNS` table for storing topic clusters
+- Created `MUSEUM_DW_PROD.MONITORING.ANALYZE_AGENT_QUESTION_GAPS` stored procedure:
+  - Pulls last 24h of agent questions from observability events
+  - Clusters by topic (Revenue, Tickets, Retail, Members, Retention, Capacity, Forecasting, etc.)
+  - Detects coverage gaps: >50% failure = HIGH, >30% = MEDIUM, 10+ questions = INFO
+  - Sends email alert via `MUSEUM_EMAIL_ALERTS` notification integration
+- Created `MUSEUM_DW_PROD.MONITORING.TASK_AGENT_PATTERN_ANALYSIS` task (daily at 8 AM ET)
+- Created `MUSEUM_EMAIL_ALERTS` notification integration → jmyers@911memorial.org
+
+**Verified Query Framework** (`analyses/verified_queries/`)
+- 30 certified verified queries across 8 business domains:
+  - `revenue_operations/` (7) — DOW, daily/monthly trends, weekend, fiscal year, net, payment
+  - `ticket_sales/` (5) — by type, AOV trend, discounts, utilization, purchase-to-entry
+  - `visitor_experience/` (2) — hourly traffic, by gate
+  - `retail/` (2) — by category, top products
+  - `membership/` (3) — LTV by segment, by tier, by membership type
+  - `campaigns/` (1) — by campaign type
+  - `donor_retention/` (5) — by tier, by membership, survival curve, at-risk, churn
+  - `capacity_planning/` (5) — availability, sold-out, peak demand, weekend, half-life
+- Each domain has `_verified_queries.yml` with governance metadata:
+  - stakeholder_owner, adm_reference, approved_by, approved_date, tags, power_bi_datasets
+- SQL files use `SEMANTIC_VIEW()` syntax for direct validation
+- `macros/operations/sync_verified_queries.sql` — run-operation to list/validate all VQRs
+- `analyses/verified_queries/README.md` — full documentation of conventions and governance
+
+**Semantic View Updates**
+- `SV_MUSEUM_OPERATIONS` expanded to 20 verified queries (was 6)
+- `SV_DONOR_RETENTION` expanded to 10 verified queries (was 4)
+
+**Model count: 45 models | 30 analyses | 170 tests | 487 macros**
+
+---
+
 ## [2.0.0] - 2026-05-20
 
 ### Identity Resolution & Full Star Schema

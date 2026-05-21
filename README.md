@@ -2,7 +2,7 @@
 
 A production dbt project for the Museum Data Warehouse on Snowflake. Transforms raw bronze-layer data into analytics-ready silver, gold, and ML feature tables powering operations dashboards, member engagement, retail performance, and ticket demand forecasting.
 
-**Current state:** 45 models | 7 sources | 170 tests | 1 snapshot | 2 semantic views | 3 macros
+**Current state:** 45 models | 7 sources | 170 tests | 30 analyses | 1 snapshot | 2 semantic views | 1 Cortex agent | 4 macros
 
 ---
 
@@ -101,29 +101,74 @@ A single person can appear as:
 ### Approach: Connected Components via Shared Identifiers
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    IDENTITY RESOLUTION GRAPH                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  Transaction A          Transaction B          CRM Record         │
-│  email: j@museum.org    phone: 212-555-1234    email: j@museum   │
-│  phone: 212-555-1234                           phone: 212-555-   │
-│        │                       │                1234             │
-│        └───────┐   ┌──────────┘                   │             │
-│                ▼   ▼                               │             │
-│         ┌──────────────┐                           │             │
-│         │ SHARED PHONE │◄──────────────────────────┘             │
-│         └──────────────┘                                         │
-│                │                                                  │
-│                ▼                                                  │
-│     ┌─────────────────────┐                                      │
-│     │  SINGLE CUSTOMER_ID │  (MD5 hash of earliest email)        │
-│     │  customer_id: abc123│                                      │
-│     │  emails: [j@museum] │                                      │
-│     │  phones: [212-555-] │                                      │
-│     └─────────────────────┘                                      │
-│                                                                   │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        IDENTITY RESOLUTION GRAPH                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  SCENARIO 1: Shared Phone merges records                                     │
+│  ─────────────────────────────────────────                                   │
+│                                                                              │
+│  Ticket Purchase         Retail Purchase          CRM Record                 │
+│  email: j@museum.org     phone: 212-555-1234      email: j@museum.org        │
+│  phone: 212-555-1234     (no email)               phone: 212-555-1234        │
+│        │                       │                        │                    │
+│        └───────────┐   ┌──────┘                         │                    │
+│                    ▼   ▼                                │                    │
+│             ┌──────────────┐                             │                    │
+│             │ SHARED PHONE │◄────────────────────────────┘                    │
+│             └──────┬───────┘                                                 │
+│                    │                                                          │
+│                    ▼                                                          │
+│         ┌──────────────────────┐                                             │
+│         │   customer_id: abc1  │                                             │
+│         │   emails: [j@museum] │  ← All 3 records are ONE customer           │
+│         │   phones: [212-555-] │                                             │
+│         └──────────────────────┘                                             │
+│                                                                              │
+│                                                                              │
+│  SCENARIO 2: Shared Email merges records                                     │
+│  ─────────────────────────────────────────                                   │
+│                                                                              │
+│  Ticket Purchase (May 1)      Retail Purchase (May 5)     Ticket (May 10)    │
+│  email: sarah@gmail.com       email: sarah@gmail.com      email: sarah@gm    │
+│  phone: 917-555-8888          (no phone)                  phone: 646-555-    │
+│        │                            │                     9999               │
+│        └──────────┐     ┌──────────┘                       │                 │
+│                   ▼     ▼                                  │                 │
+│            ┌──────────────┐                                │                 │
+│            │ SHARED EMAIL  │◄──────────────────────────────┘                  │
+│            └──────┬───────┘                                                  │
+│                   │                                                           │
+│                   ▼                                                           │
+│        ┌────────────────────────────┐                                        │
+│        │   customer_id: def2        │                                        │
+│        │   emails: [sarah@gmail]    │  ← Same email = same person            │
+│        │   phones: [917-555-8888,   │  ← Both phones collected               │
+│        │            646-555-9999]   │                                        │
+│        └────────────────────────────┘                                        │
+│                                                                              │
+│                                                                              │
+│  SCENARIO 3: Transitive merge (email→phone→email chain)                      │
+│  ──────────────────────────────────────────────────────                      │
+│                                                                              │
+│  Transaction A             Transaction B             Transaction C            │
+│  email: work@911.org       email: work@911.org       phone: 212-555-4444     │
+│  (no phone)                phone: 212-555-4444       email: personal@me.com  │
+│        │                         │                         │                 │
+│        └────── SHARED ──────────┘                         │                 │
+│                EMAIL                                       │                 │
+│                  │                                         │                 │
+│                  └────────── SHARED PHONE ────────────────┘                  │
+│                                                                              │
+│                              ▼                                               │
+│               ┌────────────────────────────────┐                             │
+│               │   customer_id: ghi3            │                             │
+│               │   emails: [work@911,           │  ← A, B, C all resolve     │
+│               │            personal@me]        │    to ONE customer via      │
+│               │   phones: [212-555-4444]       │    transitive matching      │
+│               └────────────────────────────────┘                             │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Rules
@@ -185,21 +230,33 @@ museum-dbt/
 │   │   ├── schema.yml         # Column tests, data quality generics
 │   │   └── silver_*.sql
 │   ├── gold/
-│   │   ├── dimensions/        # Dimension tables (7 models)
+│   │   ├── dimensions/        # Dimension tables (8 models)
 │   │   │   ├── schema.yml     # Contract enforcement, accepted_values
 │   │   │   └── dim_*.sql
-│   │   ├── facts/             # Fact tables (12 models)
+│   │   ├── facts/             # Fact tables (14 models)
 │   │   │   └── fct_*.sql
-│   │   └── reports/           # Pre-joined dashboard views (5 models)
+│   │   └── reports/           # Pre-joined dashboard views (7 models)
 │   │       └── rpt_*.sql
 │   └── ml_features/           # ML feature tables (4 models)
 │       └── ml_*.sql
+├── analyses/
+│   └── verified_queries/      # 30 certified VQRs across 8 business domains
+│       ├── README.md
+│       ├── revenue_operations/ # 7 VQRs
+│       ├── ticket_sales/       # 5 VQRs
+│       ├── visitor_experience/ # 2 VQRs
+│       ├── retail/             # 2 VQRs
+│       ├── membership/         # 3 VQRs
+│       ├── campaigns/          # 1 VQR
+│       ├── donor_retention/    # 5 VQRs
+│       └── capacity_planning/  # 5 VQRs
 ├── macros/
 │   ├── generic_tests/         # Custom test macros
 │   │   └── test_hashdiff_integrity.sql
 │   └── operations/            # Run-operation macros
 │       ├── generate_schema_name.sql
-│       └── create_ticket_demand_forecast.sql
+│       ├── create_ticket_demand_forecast.sql
+│       └── sync_verified_queries.sql
 ├── tests/
 │   ├── business_rules/        # Rate bounds, no-negative checks (4 tests)
 │   ├── reconciliation/        # Cross-layer count/revenue matching (6 tests)
@@ -595,6 +652,51 @@ Donor lifecycle analytics and ticket capacity planning.
 ### Access
 
 Both views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views connector.
+
+---
+
+## Cortex Agent
+
+`MUSEUM_DW_PROD.GOLD.MUSEUM_OPERATIONS_AGENT` provides natural language analytics with full observability.
+
+**Tools:**
+- `MUSEUM_OPERATIONS_DATA` → `SV_MUSEUM_OPERATIONS` (operations, revenue, customers)
+- `DONOR_RETENTION_DATA` → `SV_DONOR_RETENTION` (retention, capacity)
+
+**Observability:**
+- All questions, generated SQL, and results are logged via `GET_AI_OBSERVABILITY_EVENTS`
+- Unredacted content access granted for full audit trail
+- Query: `SELECT * FROM TABLE(SNOWFLAKE.LOCAL.GET_AI_OBSERVABILITY_EVENTS('MUSEUM_DW_PROD', 'GOLD', 'MUSEUM_OPERATIONS_AGENT', 'CORTEX AGENT'))`
+
+**Automated Gap Detection:**
+- `MONITORING.TASK_AGENT_PATTERN_ANALYSIS` runs daily at 8 AM ET
+- Clusters questions by topic, detects unanswered patterns
+- Alerts via email when coverage gaps exceed thresholds (>50% failure = HIGH)
+- Results stored in `MONITORING.AGENT_QUESTION_PATTERNS`
+
+---
+
+## Verified Query Framework
+
+Certified queries live in `analyses/verified_queries/` organized by business domain. Each domain folder contains:
+- `_verified_queries.yml` — governance metadata (owner, ADR ref, approval, tags, PBI datasets)
+- `*.sql` — the verified query SQL using `SEMANTIC_VIEW()` syntax
+
+**30 certified VQRs** across 8 domains, synced to semantic views.
+
+**Governance fields:**
+```yaml
+- stakeholder_owner    # Business owner
+- adm_reference        # Architecture decision record
+- approved_by          # Approver username
+- approved_date        # Approval date
+- tags                 # Searchable tags (certified, action_required, etc.)
+- power_bi_datasets    # Which PBI datasets consume this
+```
+
+**Commands:**
+- `dbt run-operation sync_verified_queries` — list and validate all certified VQRs
+- `dbt compile` — validates SQL files parse correctly
 
 ---
 
