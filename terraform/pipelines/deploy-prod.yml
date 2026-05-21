@@ -1,0 +1,89 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: ns11mm-terraform-prod
+  - name: TF_WORKING_DIR
+    value: 'terraform'
+  - name: ENVIRONMENT
+    value: 'prod'
+
+stages:
+  - stage: Plan
+    displayName: 'Terraform Plan (Production)'
+    jobs:
+      - job: Plan
+        steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: '1.5.7'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Init'
+            inputs:
+              command: 'init'
+              workingDirectory: '$(TF_WORKING_DIR)'
+              backendType: 'azurerm'
+              backendServiceArm: 'sc-ns11mm-terraform'
+              backendAzureRmResourceGroupName: 'rg-ns11mm-terraform'
+              backendAzureRmStorageAccountName: 'stns11mmtfstate'
+              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmKey: 'ns11mm-data-platform-$(ENVIRONMENT).tfstate'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Plan'
+            inputs:
+              command: 'plan'
+              workingDirectory: '$(TF_WORKING_DIR)'
+              environmentServiceName: 'sc-ns11mm-terraform'
+              commandOptions: '-var-file=environments/$(ENVIRONMENT).tfvars.json -out=tfplan'
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(TF_WORKING_DIR)/tfplan'
+              artifact: 'tfplan-$(ENVIRONMENT)'
+
+  - stage: Approve
+    displayName: 'Manual Approval Gate'
+    dependsOn: Plan
+    jobs:
+      - job: WaitForApproval
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            displayName: 'Approve Production Deploy'
+            inputs:
+              notifyUsers: 'jwmyers82@gmail.com'
+              instructions: |
+                Review the Terraform plan artifact for production changes.
+                This is a Tier 1 infrastructure change requiring Data Platform Manager approval.
+                Verify: Change Log entry exists, 72-hour notice was given, plan looks correct.
+
+  - stage: Apply
+    displayName: 'Terraform Apply (Production)'
+    dependsOn: Approve
+    jobs:
+      - deployment: Apply
+        environment: 'ns11mm-prod'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: TerraformInstaller@1
+                  inputs:
+                    terraformVersion: '1.5.7'
+
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifact: 'tfplan-$(ENVIRONMENT)'
+                    path: '$(TF_WORKING_DIR)'
+
+                - task: TerraformCLI@1
+                  displayName: 'Terraform Apply'
+                  inputs:
+                    command: 'apply'
+                    workingDirectory: '$(TF_WORKING_DIR)'
+                    environmentServiceName: 'sc-ns11mm-terraform'
+                    commandOptions: 'tfplan'

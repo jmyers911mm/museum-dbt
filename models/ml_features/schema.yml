@@ -1,0 +1,134 @@
+version: 2
+
+models:
+  - name: ml_daily_visitor_features
+    description: Feature table for visitor forecasting with rolling averages and lag features
+    meta:
+      owner: Data Science
+      ml_target: daily visitor count prediction
+    columns:
+      - name: date_day
+        description: Date for this feature row
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+
+  - name: ml_ticket_demand_features
+    description: Feature table for ticket demand prediction with utilization and z-score features
+    meta:
+      owner: Data Science
+      ml_target: ticket demand level prediction
+
+  - name: ml_donor_churn_features
+    description: Feature table for donor churn prediction with tenure, velocity, and recency features
+    meta:
+      owner: Data Science
+      ml_target: donor churn classification
+    columns:
+      - name: contact_id
+        tests:
+          - not_null
+          - unique
+      - name: is_churned
+        description: Binary churn label (BOOLEAN)
+        tests:
+          - not_null
+
+  - name: ml_member_churn_features
+    description: Feature table for member churn risk scoring with engagement metrics
+    meta:
+      owner: Data Science
+      ml_target: member churn risk flag
+    columns:
+      - name: contact_id
+        tests:
+          - not_null
+          - unique
+
+  - name: ml_ticket_no_show_features
+    description: Feature table for predicting ticket no-shows (unused tickets). Includes customer history, ticket type patterns, and temporal features.
+    meta:
+      owner: Data Science
+      ml_target: is_no_show (binary classification)
+      business_value: Oversell high no-show slots to increase revenue
+    columns:
+      - name: ticket_number
+        tests:
+          - not_null
+          - unique
+      - name: is_no_show
+        description: Binary label - 1 if ticket was not scanned (no-show)
+        tests:
+          - not_null
+
+  - name: ml_retail_cross_sell_features
+    description: Product co-occurrence matrix for cross-sell recommendations. Pairs of products frequently bought together.
+    meta:
+      owner: Data Science
+      ml_target: co_purchase_count (recommendation strength)
+      business_value: Product placement and bundle pricing at POS
+
+  - name: ml_email_send_time_features
+    description: Per-subscriber send time optimization features. Maps send hour to open probability.
+    meta:
+      owner: Data Science
+      ml_target: was_opened (binary), minutes_to_open (regression)
+      business_value: Optimize send time per subscriber for maximum open rate
+    columns:
+      - name: subscriber_key
+        tests:
+          - not_null
+      - name: was_opened
+        description: Binary label - 1 if email was opened
+        tests:
+          - not_null
+
+  - name: ml_campaign_response_features
+    description: Subscriber-level propensity scoring for campaign targeting. Combines email engagement with customer value.
+    meta:
+      owner: Data Science
+      ml_target: is_high_responder (binary classification)
+      business_value: Target high-propensity members for fundraising asks
+    columns:
+      - name: subscriber_key
+        tests:
+          - not_null
+          - unique
+
+  - name: ml_dynamic_pricing_features
+    description: Demand-based pricing features for ticket slots. Includes benchmarks, z-scores, and suggested multipliers.
+    meta:
+      owner: Data Science
+      ml_target: suggested_price_multiplier (regression)
+      business_value: Revenue optimization through dynamic pricing
+
+  - name: ml_donor_upgrade_propensity_features
+    description: Features for predicting which donors will upgrade to the next LTV tier. Combines spending velocity, engagement, and tenure.
+    meta:
+      owner: Data Science
+      ml_target: is_upgrade_candidate (binary classification)
+      business_value: Proactive stewardship for high-potential donors
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+
+  - name: ml_visitor_forecast_training
+    description: Time-series training data for Snowflake ML FORECAST model. Daily visitor counts with temporal features.
+    meta:
+      owner: Data Science
+      ml_target: y (daily visitor count, time-series forecast)
+      business_value: Staff scheduling and capacity planning
+    columns:
+      - name: ds
+        description: Timestamp for time-series (date)
+        tests:
+          - not_null
+          - unique
+      - name: y
+        description: Target variable - daily visitor count
+        tests:
+          - not_null

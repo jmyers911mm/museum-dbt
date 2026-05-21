@@ -1,0 +1,11 @@
+# packages:
+#   - package: dbt-labs/dbt_project_evaluator
+#     version: [">=0.9.0", "<1.0.0"]
+#
+# NOTE: Uncomment and run `dbt deps` in CI/local environment.
+# Cannot install in Snowflake workspace (no external network access).
+# The dbt_project_evaluator package provides:
+#   - DAG structure validation (naming conventions, direct joins, model fanout)
+#   - Model performance analysis
+#   - Documentation coverage checks
+#   - Test coverage scoring

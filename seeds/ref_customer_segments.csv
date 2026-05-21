@@ -1,0 +1,4 @@
+customer_segment,description,identity_source
+Known Member,Customer matched to a Salesforce CRM contact_id,CRM email match
+Identified Visitor,Customer with email or phone but no CRM record,POS capture
+Anonymous,No identifiers captured (cash transaction no email/phone),None

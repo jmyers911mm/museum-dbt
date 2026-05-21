@@ -1,0 +1,33 @@
+
+  
+    
+
+        create or replace transient table MUSEUM_DW_PROD.SILVER.silver_pos_retail
+        copy grants as
+        (SELECT
+    transaction_id,
+    transaction_timestamp,
+    DATE_TRUNC('day', transaction_timestamp) AS transaction_date,
+    item_sku,
+    item_name,
+    item_category,
+    quantity,
+    unit_price,
+    total_amount,
+    discount_amount,
+    CASE WHEN discount_amount > 0 THEN TRUE ELSE FALSE END AS is_discounted,
+    ROUND(CASE WHEN total_amount > 0 THEN discount_amount / (total_amount + discount_amount) ELSE 0 END, 4) AS discount_pct,
+    payment_method,
+    cashier_id,
+    terminal_id,
+    customer_email,
+    customer_phone,
+    CASE WHEN customer_phone IS NOT NULL THEN TRUE ELSE FALSE END AS has_phone,
+    product_id,
+    payment_method_id,
+    hashdiff,
+    _loaded_at
+FROM MUSEUM_DW_PROD.SILVER.stg_pos_retail
+        );
+      
+  

@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table MUSEUM_DW_PROD.GOLD.ref_ticket_types (ticket_type_id text,ticket_type_name text,visitor_category text,standard_price integer,is_free_admission boolean,pricing_tier text,is_special_exhibition boolean)
+  ;
+    -- dbt seed --
+    
+            insert into MUSEUM_DW_PROD.GOLD.ref_ticket_types (ticket_type_id, ticket_type_name, visitor_category, standard_price, is_free_admission, pricing_tier, is_special_exhibition) values
+            (%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s,%s,%s)
+        
+
+;
+  

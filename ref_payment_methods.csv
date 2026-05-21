@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table MUSEUM_DW_PROD.GOLD.ref_payment_methods (payment_method_id text,payment_method_name text,payment_category text,is_electronic boolean)
+  ;
+    -- dbt seed --
+    
+            insert into MUSEUM_DW_PROD.GOLD.ref_payment_methods (payment_method_id, payment_method_name, payment_category, is_electronic) values
+            (%s,%s,%s,%s),(%s,%s,%s,%s),(%s,%s,%s,%s),(%s,%s,%s,%s)
+        
+
+;
+  

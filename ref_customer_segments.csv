@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table MUSEUM_DW_PROD.GOLD.ref_customer_segments (customer_segment text,description text,identity_source text)
+  ;
+    -- dbt seed --
+    
+            insert into MUSEUM_DW_PROD.GOLD.ref_customer_segments (customer_segment, description, identity_source) values
+            (%s,%s,%s),(%s,%s,%s),(%s,%s,%s)
+        
+
+;
+  
