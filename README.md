@@ -9,16 +9,20 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 ## Table of Contents
 
 - [Architecture](#architecture)
+- [Identity Resolution](#identity-resolution)
 - [Project Structure](#project-structure)
 - [Data Sources](#data-sources)
 - [Data Layers](#data-layers)
 - [Models](#models)
   - [Staging](#staging-6-models)
   - [Silver](#silver-6-models)
-  - [Gold Dimensions](#gold-dimensions-7-models)
-  - [Gold Facts](#gold-facts-12-models)
-  - [Gold Reports](#gold-reports-5-models)
+  - [Gold Dimensions](#gold-dimensions-8-models)
+  - [Gold Facts](#gold-facts-14-models)
+  - [Gold Reports](#gold-reports-7-models)
   - [ML Features](#ml-features-4-models)
+- [Semantic Views](#semantic-views)
+- [Cortex Agent](#cortex-agent)
+- [Verified Query Framework](#verified-query-framework)
 - [Testing Strategy](#testing-strategy)
   - [Schema Tests](#schema-tests)
   - [Data Quality Tests](#data-quality-tests)
@@ -36,7 +40,6 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 - [Deployment](#deployment)
 - [Governance](#governance)
 - [Contributing](#contributing)
-
 - [Model Lineage](#model-lineage)
 
 ---
