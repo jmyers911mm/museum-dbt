@@ -25,7 +25,7 @@ models:
     columns: true
   +pre-hook:
     - "ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = 3600"
-    - "{% if 'intraday' in config.get('tags', []) %}ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = 300{% endif %}"
+    - "{% if 'intraday' in model.tags %}ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = 300{% endif %}"
   museum_dbt:
     staging:
       +materialized: view
@@ -37,6 +37,7 @@ models:
       +materialized: incremental
       +schema: SILVER
       +incremental_strategy: merge
+      +on_schema_change: append_new_columns
       +tags: ['daily', 'critical']
       +query_tag: 'dbt_museum_silver'
       +copy_grants: true
@@ -54,6 +55,7 @@ models:
         - "GRANT SELECT ON {{ this }} TO ROLE POWERBI_ROLE"
         - "GRANT SELECT ON {{ this }} TO ROLE ML_ROLE"
       dimensions:
+        +materialized: table
         +group: gold_dimensions
         +access: public
       facts:

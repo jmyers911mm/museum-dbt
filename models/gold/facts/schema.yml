@@ -91,12 +91,16 @@ models:
 
   - name: fct_ticket_utilization
     description: "DEPRECATED: Superseded by fct_ticket_sales (ticket-level grain with customer_id, payment_method_id)"
+    config:
+      deprecation_date: "2026-07-01"
     meta:
       deprecation_date: "2026-07-01"
       superseded_by: fct_ticket_sales
 
   - name: fct_retail_performance
     description: "DEPRECATED: Superseded by fct_retail_line_items (line-item grain with customer, product, payment FKs)"
+    config:
+      deprecation_date: "2026-07-01"
     meta:
       deprecation_date: "2026-07-01"
       superseded_by: fct_retail_line_items

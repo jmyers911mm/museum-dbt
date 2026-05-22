@@ -257,7 +257,7 @@ museum-dbt/
 │   │   │   └── fct_*.sql
 │   │   └── reports/           # Pre-joined dashboard views (7 models)
 │   │       └── rpt_*.sql
-│   └── ml_features/           # ML feature tables (4 models)
+│   └── ml_features/           # ML feature tables (11 models)
 │       └── ml_*.sql
 ├── analyses/
 │   └── verified_queries/      # 30 certified VQRs across 8 business domains

@@ -2,6 +2,31 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.4.0] - 2026-05-22
+
+### Governance & Configuration Hardening
+
+**`.gitignore`**
+- Added `dbt.log` and `graph.gpickle` — both were previously committed; should never be in source control
+
+**`CODEOWNERS`**
+- Removed `/profiles.yml` entry — file is already gitignored and should not be committed (convention violation / credential exposure risk)
+- Added `/analyses/verified_queries/` — 30 certified VQRs now require reviewer approval
+
+**`dbt_project.yml`**
+- Gold dimensions: added `+materialized: table` override — README specifies full rebuild, not inherited `incremental`
+- Silver models: added `+on_schema_change: append_new_columns` — prevents silent column drops on incremental runs when Bronze adds columns
+- Fixed `+pre-hook` intraday timeout: changed `config.get('tags', [])` → `model.tags` — the previous expression evaluated the project config dict (always empty), so the 300s timeout for intraday-tagged models never fired
+
+**`models/gold/facts/schema.yml`**
+- `fct_ticket_utilization`: added `config.deprecation_date: 2026-07-01` — proper dbt deprecation marker (meta-only annotation has no runtime effect)
+- `fct_retail_performance`: added `config.deprecation_date: 2026-07-01` — same fix
+
+**`README.md`**
+- Project Structure: corrected ML Features model count from "4 models" to "11 models" — documentation drift since v2.3.0
+
+---
+
 ## [2.3.0] - 2026-05-21
 
 ### ML Feature Tables — 7 New Models
