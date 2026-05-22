@@ -235,9 +235,8 @@ RPT_CUSTOMER_LTV.CUSTOMER_ID     ← Unified LTV across both channels
 ```
 museum-dbt/
 ├── dbt_project.yml            # Project configuration, materializations, hooks
-├── profiles.yml               # Connection profiles (dev, staging, prod)
 ├── CHANGELOG.md               # Release history
-├── CONTRIBUTING.md            # Development workflow & conventions
+├── CONTRIBUTING.md            # Development workflow & conventions (includes profiles.yml setup)
 ├── CODEOWNERS                 # PR approval routing
 ├── .github/
 │   └── workflows/

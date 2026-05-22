@@ -9,6 +9,9 @@ All notable changes to the museum-dbt project will be documented in this file.
 **`.gitignore`**
 - Added `dbt.log` and `graph.gpickle` — both were previously committed; should never be in source control
 
+**`dbt.log` / `graph.gpickle`**
+- Purged file contents (2.81 MB log with compiled SQL, connection metadata, execution traces; binary DAG artifact) — files zeroed pending `git rm --cached` in local clone
+
 **`CODEOWNERS`**
 - Removed `/profiles.yml` entry — file is already gitignored and should not be committed (convention violation / credential exposure risk)
 - Added `/analyses/verified_queries/` — 30 certified VQRs now require reviewer approval
@@ -24,6 +27,7 @@ All notable changes to the museum-dbt project will be documented in this file.
 
 **`README.md`**
 - Project Structure: corrected ML Features model count from "4 models" to "11 models" — documentation drift since v2.3.0
+- Removed `profiles.yml` from project structure tree — file is not committed; added note pointing to CONTRIBUTING.md for profile setup
 
 ---
 
