@@ -2,6 +2,30 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.5.0] - 2026-05-25
+
+### Infrastructure & Access
+
+**Workspace Migration**
+- Moved workspace from private `USER$.PUBLIC."museum-dbt"` to shared `MUSEUM_DW_DEV.PUBLIC."museum-dbt"` for team collaboration
+- Created `profiles.yml` (was missing after migration) — targets: dev (`MUSEUM_DW_DEV`) and prod (`MUSEUM_DW_PROD`)
+
+**Git Integration**
+- Created `GITHUB_INTEGRATION` API integration (Snowflake GitHub App auth)
+- Created `MUSEUM_DW_DEV.PUBLIC.MUSEUM_DBT_REPO` Git Repository stage linked to `https://github.com/jmyers911mm/museum-dbt.git`
+
+**Power BI Authentication**
+- Created `POWERBI` external OAuth security integration (Azure AD) for Microsoft Account SSO from Power BI
+- Configured `EXTERNAL_OAUTH_TOKEN_USER_MAPPING_CLAIM = 'upn'` mapping to `login_name`
+
+**README.md**
+- Expanded Access Control section with all 10 roles (added ORGADMIN, SECURITYADMIN, USERADMIN, SYSADMIN, PUBLIC)
+- Added role hierarchy diagram
+- Added detailed access matrix (read/write per database/schema per role)
+- Added POWERBI_ROLE and ML_ROLE detail sections
+
+---
+
 ## [2.4.0] - 2026-05-22
 
 ### Governance & Configuration Hardening
