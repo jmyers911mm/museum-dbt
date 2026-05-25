@@ -2,6 +2,59 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.5.0] - 2026-05-25
+
+### Infrastructure & Access
+
+**Workspace Migration**
+- Moved workspace from private `USER$.PUBLIC."museum-dbt"` to shared `MUSEUM_DW_DEV.PUBLIC."museum-dbt"` for team collaboration
+- Created `profiles.yml` (was missing after migration) — targets: dev (`MUSEUM_DW_DEV`) and prod (`MUSEUM_DW_PROD`)
+
+**Git Integration**
+- Created `GITHUB_INTEGRATION` API integration (Snowflake GitHub App auth)
+- Created `MUSEUM_DW_DEV.PUBLIC.MUSEUM_DBT_REPO` Git Repository stage linked to `https://github.com/jmyers911mm/museum-dbt.git`
+
+**Power BI Authentication**
+- Created `POWERBI` external OAuth security integration (Azure AD) for Microsoft Account SSO from Power BI
+- Configured `EXTERNAL_OAUTH_TOKEN_USER_MAPPING_CLAIM = 'upn'` mapping to `login_name`
+
+**README.md**
+- Expanded Access Control section with all 10 roles (added ORGADMIN, SECURITYADMIN, USERADMIN, SYSADMIN, PUBLIC)
+- Added role hierarchy diagram
+- Added detailed access matrix (read/write per database/schema per role)
+- Added POWERBI_ROLE and ML_ROLE detail sections
+
+---
+
+## [2.4.0] - 2026-05-22
+
+### Governance & Configuration Hardening
+
+**`.gitignore`**
+- Added `dbt.log` and `graph.gpickle` — both were previously committed; should never be in source control
+
+**`dbt.log` / `graph.gpickle`**
+- Purged file contents (2.81 MB log with compiled SQL, connection metadata, execution traces; binary DAG artifact) — files zeroed pending `git rm --cached` in local clone
+
+**`CODEOWNERS`**
+- Removed `/profiles.yml` entry — file is already gitignored and should not be committed (convention violation / credential exposure risk)
+- Added `/analyses/verified_queries/` — 30 certified VQRs now require reviewer approval
+
+**`dbt_project.yml`**
+- Gold dimensions: added `+materialized: table` override — README specifies full rebuild, not inherited `incremental`
+- Silver models: added `+on_schema_change: append_new_columns` — prevents silent column drops on incremental runs when Bronze adds columns
+- Fixed `+pre-hook` intraday timeout: changed `config.get('tags', [])` → `model.tags` — the previous expression evaluated the project config dict (always empty), so the 300s timeout for intraday-tagged models never fired
+
+**`models/gold/facts/schema.yml`**
+- `fct_ticket_utilization`: added `config.deprecation_date: 2026-07-01` — proper dbt deprecation marker (meta-only annotation has no runtime effect)
+- `fct_retail_performance`: added `config.deprecation_date: 2026-07-01` — same fix
+
+**`README.md`**
+- Project Structure: corrected ML Features model count from "4 models" to "11 models" — documentation drift since v2.3.0
+- Removed `profiles.yml` from project structure tree — file is not committed; added note pointing to CONTRIBUTING.md for profile setup
+
+---
+
 ## [2.3.0] - 2026-05-21
 
 ### ML Feature Tables — 7 New Models

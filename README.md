@@ -235,9 +235,8 @@ RPT_CUSTOMER_LTV.CUSTOMER_ID     ← Unified LTV across both channels
 ```
 museum-dbt/
 ├── dbt_project.yml            # Project configuration, materializations, hooks
-├── profiles.yml               # Connection profiles (dev, staging, prod)
 ├── CHANGELOG.md               # Release history
-├── CONTRIBUTING.md            # Development workflow & conventions
+├── CONTRIBUTING.md            # Development workflow & conventions (includes profiles.yml setup)
 ├── CODEOWNERS                 # PR approval routing
 ├── .github/
 │   └── workflows/
@@ -257,7 +256,7 @@ museum-dbt/
 │   │   │   └── fct_*.sql
 │   │   └── reports/           # Pre-joined dashboard views (7 models)
 │   │       └── rpt_*.sql
-│   └── ml_features/           # ML feature tables (4 models)
+│   └── ml_features/           # ML feature tables (11 models)
 │       └── ml_*.sql
 ├── analyses/
 │   └── verified_queries/      # 30 certified VQRs across 8 business domains
@@ -519,6 +518,65 @@ All incremental models use **merge** strategy:
 ---
 
 ## Access Control & Grants
+
+### Roles
+
+| Role | Purpose | Warehouses |
+|------|---------|-----------|
+| **ACCOUNTADMIN** | Full account administration. Manages all aspects of the Snowflake account including billing, resource monitors, and security integrations. Top-level role. | All |
+| **ORGADMIN** | Organization-level administration. Manages accounts within the Snowflake organization. | — |
+| **SECURITYADMIN** | Security administration. Manages grants, role hierarchy, and network policies. Parent of USERADMIN. | — |
+| **USERADMIN** | User and role management. Creates and manages users and custom roles. | — |
+| **SYSADMIN** | System administration. Creates and manages databases, warehouses, and other account objects. Parent of all custom roles. | All |
+| **PUBLIC** | Default role granted to every user. Minimal privileges. | — |
+| **DBT_DEV_ROLE** | dbt development. Full read/write access to `MUSEUM_DW_DEV` (all schemas: BRONZE, SILVER, GOLD, ML_FEATURES, PUBLIC). Owns all dbt-created objects in dev. | COMPUTE_WH, DBT_DEV_WH |
+| **DBT_PROD_ROLE** | dbt production builds. Full read/write access to `MUSEUM_DW_PROD` (all schemas). Owns all dbt-created objects in prod. | DBT_PROD_WH |
+| **POWERBI_ROLE** | Read-only reporting for Power BI dashboards. No write access anywhere. | COMPUTE_WH, DBT_PROD_WH, MONITORING_WH |
+| **ML_ROLE** | ML engineering. Read access to Silver/Gold layers; full read/write to `ML_FEATURES` schema. Can create Snowflake ML models (FORECAST, ANOMALY_DETECTION). | COMPUTE_WH, ML_STUDIO_WH, MONITORING_WH |
+
+### Role Hierarchy
+
+```
+ACCOUNTADMIN
+├── SECURITYADMIN
+│   └── USERADMIN
+├── SYSADMIN
+│   ├── DBT_DEV_ROLE
+│   ├── DBT_PROD_ROLE
+│   ├── POWERBI_ROLE
+│   └── ML_ROLE
+└── ORGADMIN
+```
+
+### Role Access Matrix
+
+| Database.Schema | DBT_DEV_ROLE | DBT_PROD_ROLE | POWERBI_ROLE | ML_ROLE |
+|-----------------|:------------:|:-------------:|:------------:|:-------:|
+| **MUSEUM_DW_DEV.BRONZE** | Read/Write | — | — | — |
+| **MUSEUM_DW_DEV.SILVER** | Read/Write | — | — | — |
+| **MUSEUM_DW_DEV.GOLD** | Read/Write | — | Read | Read |
+| **MUSEUM_DW_DEV.ML_FEATURES** | Read/Write | — | — | Read |
+| **MUSEUM_DW_PROD.BRONZE** | — | Read/Write | — | — |
+| **MUSEUM_DW_PROD.SILVER** | — | Read/Write | — | Read |
+| **MUSEUM_DW_PROD.GOLD** | — | Read/Write | Read | Read |
+| **MUSEUM_DW_PROD.ML_FEATURES** | — | Read/Write | — | Read/Write |
+
+### POWERBI_ROLE Details
+
+- **Read:** All tables in `MUSEUM_DW_PROD.GOLD` (dims, facts, reports, seeds), plus monitoring views (`V_BUILD_HISTORY`, `V_DATA_SOURCE_STATUS`, `V_PIPELINE_HEALTH`, `V_SLA_COMPLIANCE`, `V_SOURCE_FRESHNESS_HISTORY`)
+- **Read:** All tables in `MUSEUM_DW_DEV.GOLD` (for dev dashboard testing)
+- **Read:** Semantic views `SV_MUSEUM_OPERATIONS`, `SV_DONOR_RETENTION`
+- **Write:** None
+
+### ML_ROLE Details
+
+- **Read:** All Silver tables/views (staging views + incremental tables) in PROD
+- **Read:** All Gold tables in both DEV and PROD
+- **Read/Write:** All ML_FEATURES tables in PROD (INSERT, UPDATE, DELETE, TRUNCATE)
+- **Create:** FORECAST and ANOMALY_DETECTION models in DEV and PROD GOLD schemas
+- **Read:** Monitoring views in PROD GOLD
+
+### dbt Post-Hook Grants
 
 Configured via `dbt_project.yml` post-hooks:
 

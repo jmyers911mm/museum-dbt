@@ -3,7 +3,7 @@
 
 # Infrastructure files (Tier 1 — requires Data Platform Manager approval)
 /dbt_project.yml                    @jwmyers82
-/profiles.yml                       @jwmyers82
+
 /macros/data_quality/               @jwmyers82
 /macros/operations/                 @jwmyers82
 /macros/generate_schema_name.sql    @jwmyers82
@@ -37,6 +37,7 @@ CODEOWNERS                          @jwmyers82
 /macros/generic_tests/              @jwmyers82
 
 # Documentation & Governance
+/analyses/verified_queries/          @jwmyers82
 /RUNBOOK.md                         @jwmyers82
 /CONTRIBUTING.md                    @jwmyers82
 /CHANGELOG.md                       @jwmyers82
