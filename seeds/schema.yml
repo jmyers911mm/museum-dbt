@@ -40,3 +40,45 @@ seeds:
         tests:
           - unique
           - not_null
+
+  - name: raw_google_analytics
+    description: Seed data for Google Analytics sessions (simulates bronze.raw_google_analytics)
+    config:
+      schema: BRONZE
+    columns:
+      - name: session_id
+        tests:
+          - unique
+          - not_null
+
+  - name: raw_google_ads
+    description: Seed data for Google Ads daily performance (simulates bronze.raw_google_ads)
+    config:
+      schema: BRONZE
+    columns:
+      - name: ad_id
+        tests:
+          - not_null
+
+  - name: raw_meta_ads
+    description: Seed data for Meta Ads daily performance (simulates bronze.raw_meta_ads)
+    config:
+      schema: BRONZE
+    columns:
+      - name: ad_id
+        tests:
+          - not_null
+
+  - name: ref_marketing_channels
+    description: Reference data for marketing channel dimension
+    config:
+      schema: GOLD
+    columns:
+      - name: channel_id
+        tests:
+          - unique
+          - not_null
+      - name: channel_name
+        tests:
+          - unique
+          - not_null

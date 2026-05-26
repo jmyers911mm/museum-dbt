@@ -1,9 +1,0 @@
-ticket_type_id,ticket_type_name,visitor_category,standard_price,is_free_admission,pricing_tier,is_special_exhibition
-General Admission Adult,General Admission Adult,Adult,28.00,false,Standard,false
-General Admission Child,General Admission Child,Child,18.00,false,Concession,false
-General Admission Senior,General Admission Senior,Senior,22.00,false,Concession,false
-Family Pack (4),Family Pack (4),Family,85.00,false,Package,false
-Free Member Entry,Free Member Entry,Member,0.00,true,Membership,false
-Member Guest,Member Guest,Member,0.00,true,Membership,false
-School Group,School Group,School Group,12.00,false,Group,false
-Special Exhibition,Special Exhibition,Adult,35.00,false,Standard,true

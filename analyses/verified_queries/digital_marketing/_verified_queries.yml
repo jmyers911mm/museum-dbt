@@ -1,0 +1,27 @@
+version: 2
+
+analyses:
+  - name: roas_by_platform
+    description: "ROAS breakdown by advertising platform for the current month"
+    config:
+      tags: ['verified_query', 'digital_marketing']
+
+  - name: top_campaigns_by_spend
+    description: "Top 10 campaigns ranked by total ad spend with performance metrics"
+    config:
+      tags: ['verified_query', 'digital_marketing']
+
+  - name: weekend_vs_weekday_ctr
+    description: "Click-through rate comparison between weekends and weekdays by platform"
+    config:
+      tags: ['verified_query', 'digital_marketing']
+
+  - name: cross_channel_comparison
+    description: "Cross-channel marketing performance with spend, conversions, and ROAS"
+    config:
+      tags: ['verified_query', 'digital_marketing']
+
+  - name: website_conversion_funnel
+    description: "Website conversion funnel from landing to purchase by traffic channel"
+    config:
+      tags: ['verified_query', 'digital_marketing']

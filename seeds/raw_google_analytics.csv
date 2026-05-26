@@ -1,0 +1,21 @@
+session_id,session_date,user_pseudo_id,source,medium,campaign,page_path,event_name,event_count,session_duration_seconds,is_new_user,device_category,city,country
+GA-S001,2025-11-01,UP001,google,organic,,/home,page_view,3,245,true,desktop,New York,United States
+GA-S002,2025-11-01,UP002,google,cpc,winter_campaign,/tickets,page_view,2,180,true,mobile,Brooklyn,United States
+GA-S003,2025-11-01,UP003,(direct),(none),,/exhibitions,page_view,4,320,false,desktop,Jersey City,United States
+GA-S004,2025-11-01,UP004,google,organic,,/membership,page_view,2,150,true,tablet,Manhattan,United States
+GA-S005,2025-11-02,UP005,facebook,paid,holiday_promo,/tickets,purchase,1,90,true,mobile,Queens,United States
+GA-S006,2025-11-02,UP001,google,organic,,/gift-shop,page_view,5,400,false,desktop,New York,United States
+GA-S007,2025-11-02,UP006,email,newsletter,nov_newsletter,/exhibitions,page_view,3,210,false,mobile,Hoboken,United States
+GA-S008,2025-11-03,UP007,google,cpc,winter_campaign,/tickets,purchase,1,120,true,desktop,Newark,United States
+GA-S009,2025-11-03,UP008,meta,paid,awareness_q4,/home,page_view,2,95,true,mobile,Bronx,United States
+GA-S010,2025-11-03,UP003,(direct),(none),,/donate,page_view,3,275,false,desktop,Jersey City,United States
+GA-S011,2025-11-04,UP009,google,organic,,/tickets,purchase,1,180,true,desktop,Philadelphia,United States
+GA-S012,2025-11-04,UP010,instagram,paid,holiday_promo,/membership,page_view,2,140,true,mobile,Stamford,United States
+GA-S013,2025-11-05,UP011,google,cpc,membership_drive,/membership,purchase,1,200,false,desktop,White Plains,United States
+GA-S014,2025-11-05,UP012,email,newsletter,nov_newsletter,/gift-shop,page_view,4,310,false,tablet,Boston,United States
+GA-S015,2025-11-05,UP002,google,cpc,winter_campaign,/tickets,page_view,2,160,false,mobile,Brooklyn,United States
+GA-S016,2025-11-06,UP013,(direct),(none),,/home,page_view,1,45,true,mobile,Hartford,United States
+GA-S017,2025-11-06,UP014,google,organic,,/exhibitions,page_view,3,250,true,desktop,New York,United States
+GA-S018,2025-11-07,UP015,meta,paid,awareness_q4,/tickets,purchase,1,110,true,mobile,Edison,United States
+GA-S019,2025-11-07,UP016,google,cpc,winter_campaign,/tickets,page_view,2,175,true,desktop,Trenton,United States
+GA-S020,2025-11-07,UP004,google,organic,,/donate,page_view,3,290,false,tablet,Manhattan,United States

@@ -104,3 +104,159 @@ models:
     meta:
       deprecation_date: "2026-07-01"
       superseded_by: fct_retail_line_items
+
+  - name: fct_digital_ad_performance
+    description: Unified digital advertising performance across Google Ads and Meta Ads platforms
+    meta:
+      owner: Marketing Team
+      grain: one row per campaign-adgroup-date-platform-placement-device combination
+    columns:
+      - name: report_date
+        description: Date of the performance metrics
+        tests:
+          - not_null
+      - name: ad_platform
+        description: Advertising platform (Google Ads, Facebook, Instagram)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Google Ads', 'Facebook', 'Instagram']
+      - name: campaign_id
+        description: Platform-specific campaign identifier
+        tests:
+          - not_null
+      - name: campaign_name
+        description: Campaign name
+        tests:
+          - not_null
+      - name: campaign_category
+        description: Derived campaign category
+        tests:
+          - not_null
+      - name: impressions
+        tests:
+          - not_null
+      - name: clicks
+        tests:
+          - not_null
+      - name: spend
+        tests:
+          - not_null
+
+  - name: fct_website_traffic
+    description: Daily website traffic aggregated by channel, campaign, page category, and device
+    meta:
+      owner: Marketing Team
+      grain: one row per date-channel-source-medium-campaign-page_category-device combination
+    columns:
+      - name: report_date
+        description: Date of the website sessions
+        tests:
+          - not_null
+      - name: channel_grouping
+        description: Marketing channel grouping
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Paid Search', 'Paid Social', 'Organic Search', 'Email', 'Direct', 'Other']
+      - name: sessions
+        description: Number of sessions
+        tests:
+          - not_null
+      - name: unique_users
+        description: Count of distinct users
+        tests:
+          - not_null
+      - name: conversions
+        description: Number of purchase conversions
+        tests:
+          - not_null
+
+  - name: fct_marketing_channel_summary
+    description: Unified daily marketing channel performance across paid, owned, and earned channels
+    meta:
+      owner: Marketing Team
+      grain: one row per date-channel combination
+    columns:
+      - name: report_date
+        description: Report date
+        tests:
+          - not_null
+      - name: channel
+        description: Marketing channel name
+        tests:
+          - not_null
+      - name: impressions
+        tests:
+          - not_null
+      - name: clicks
+        tests:
+          - not_null
+      - name: spend
+        tests:
+          - not_null
+
+  - name: fct_ad_campaign_daily
+    description: Campaign-level daily ad performance summary across Google Ads and Meta
+    meta:
+      owner: Marketing Team
+      grain: one row per campaign-platform-date
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: ad_platform
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Google Ads', 'Facebook', 'Instagram']
+      - name: campaign_id
+        tests:
+          - not_null
+      - name: campaign_name
+        tests:
+          - not_null
+      - name: impressions
+        tests:
+          - not_null
+      - name: spend
+        tests:
+          - not_null
+
+  - name: fct_website_funnel
+    description: Website conversion funnel with page progression and drop-off rates by channel and device
+    meta:
+      owner: Marketing Team
+      grain: one row per date-channel-device combination
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: channel_grouping
+        tests:
+          - not_null
+      - name: total_visitors
+        tests:
+          - not_null
+      - name: stage_converted
+        tests:
+          - not_null
+      - name: overall_conversion_rate_pct
+        tests:
+          - not_null
+
+  - name: bridge_session_customer
+    description: Bridge table linking converting GA sessions to identity-resolved customers via same-day ticket purchases
+    meta:
+      owner: Data Engineering
+      grain: one row per session-customer match
+    columns:
+      - name: session_id
+        tests:
+          - not_null
+      - name: session_date
+        tests:
+          - not_null
+      - name: channel_grouping
+        tests:
+          - not_null

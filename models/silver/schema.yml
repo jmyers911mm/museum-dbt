@@ -360,3 +360,172 @@ models:
         description: Whether this event was an unsubscribe
         tests:
           - not_null
+
+  - name: silver_google_analytics
+    description: Cleaned Google Analytics session data with channel groupings and page categorization
+    meta:
+      owner: Marketing Team
+    tests:
+      - hashdiff_integrity:
+          hashdiff_column: hashdiff
+          unique_key: session_id
+    columns:
+      - name: session_id
+        description: Unique session identifier
+        tests:
+          - unique
+          - not_null
+      - name: session_date
+        description: Date of the session
+        tests:
+          - not_null
+      - name: user_pseudo_id
+        description: Anonymous user identifier
+        tests:
+          - not_null
+      - name: source
+        description: Traffic source
+        tests:
+          - not_null
+      - name: medium
+        description: Traffic medium
+        tests:
+          - not_null
+      - name: channel_grouping
+        description: Derived marketing channel grouping
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Paid Search', 'Paid Social', 'Organic Search', 'Email', 'Direct', 'Other']
+      - name: page_category
+        description: Derived page category based on URL path
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Tickets', 'Membership', 'Retail', 'Exhibitions', 'Donations', 'General']
+      - name: event_name
+        description: Primary session event
+        tests:
+          - not_null
+      - name: is_conversion
+        description: Whether the session resulted in a purchase
+        tests:
+          - not_null
+      - name: session_duration_seconds
+        description: Duration of the session in seconds
+        tests:
+          - not_null
+
+  - name: silver_google_ads
+    description: Cleaned Google Ads performance data with derived ROAS and campaign categorization
+    meta:
+      owner: Marketing Team
+    tests:
+      - hashdiff_integrity:
+          hashdiff_column: hashdiff
+          unique_key: ad_id
+          config:
+            severity: warn
+    columns:
+      - name: ad_id
+        description: Ad identifier
+        tests:
+          - not_null
+      - name: campaign_id
+        description: Google Ads campaign identifier
+        tests:
+          - not_null
+      - name: campaign_name
+        description: Campaign name
+        tests:
+          - not_null
+      - name: ad_date
+        description: Date of the ad performance record
+        tests:
+          - not_null
+      - name: impressions
+        description: Number of impressions
+        tests:
+          - not_null
+      - name: clicks
+        description: Number of clicks
+        tests:
+          - not_null
+      - name: cost
+        description: Cost in dollars (converted from micros)
+        tests:
+          - not_null
+      - name: conversions
+        description: Number of conversions
+        tests:
+          - not_null
+      - name: network
+        description: Ad network (SEARCH or DISPLAY)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SEARCH', 'DISPLAY']
+      - name: campaign_category
+        description: Derived campaign category
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Tickets', 'Membership', 'Retail', 'General']
+
+  - name: silver_meta_ads
+    description: Cleaned Meta Ads performance data with ROAS and cost metrics
+    meta:
+      owner: Marketing Team
+    tests:
+      - hashdiff_integrity:
+          hashdiff_column: hashdiff
+          unique_key: ad_id
+          config:
+            severity: warn
+    columns:
+      - name: ad_id
+        description: Ad identifier
+        tests:
+          - not_null
+      - name: campaign_id
+        description: Meta campaign identifier
+        tests:
+          - not_null
+      - name: campaign_name
+        description: Campaign name
+        tests:
+          - not_null
+      - name: ad_date
+        description: Date of the ad performance record
+        tests:
+          - not_null
+      - name: platform
+        description: Meta platform (facebook or instagram)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['facebook', 'instagram']
+      - name: impressions
+        description: Number of impressions
+        tests:
+          - not_null
+      - name: clicks
+        description: Number of clicks
+        tests:
+          - not_null
+      - name: spend
+        description: Amount spent in dollars
+        tests:
+          - not_null
+      - name: objective
+        description: Campaign objective
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CONVERSIONS', 'AWARENESS', 'TRAFFIC']
+      - name: campaign_category
+        description: Derived campaign category
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Membership', 'Promotions', 'Awareness', 'General']

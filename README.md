@@ -2,7 +2,7 @@
 
 A production dbt project for the Museum Data Warehouse on Snowflake. Transforms raw bronze-layer data into analytics-ready silver, gold, and ML feature tables powering operations dashboards, member engagement, retail performance, and ticket demand forecasting.
 
-**Current state:** 52 models | 7 sources | 246 tests | 30 analyses | 2 snapshots | 4 seeds | 15 exposures | 6 groups | 2 semantic views | 1 Cortex agent | 4 macros
+**Current state:** 69 models | 10 sources | 372+ tests | 36 analyses | 2 snapshots | 8 seeds | 15 exposures | 6 groups | 3 semantic views | 1 Cortex agent | 4 macros
 
 ---
 
@@ -11,13 +11,13 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 | Category | Elements | Count |
 |----------|----------|-------|
 | **Architecture** | 3-layer medallion, incremental merge, identity resolution, star schema, SCD2 snapshots | ✅ |
-| **Testing** | Source, schema, data quality, business rules, reconciliation, referential integrity, seed validation | 246 tests |
+| **Testing** | Source, schema, data quality, business rules, reconciliation, referential integrity, seed validation | 372+ tests |
 | **Governance** | Groups, exposures, deprecation markers, PII classification, CODEOWNERS, ownership metadata | 6 groups / 15 exposures |
 | **CI/CD** | Slim CI (`state:modified+`), docs on merge, pre-deploy validation, full path triggers | ✅ |
-| **Semantic Layer** | 2 semantic views, 30 VQRs, 60+ synonyms, sample values, AI instructions | 20 + 10 VQRs |
+| **Semantic Layer** | 3 semantic views, 30 VQRs, 60+ synonyms, sample values, AI instructions | 20 + 10 VQRs |
 | **AI & Observability** | Cortex Agent, unredacted event logging, daily gap detection, email + Teams alerts | ✅ |
 | **Operations** | Task DAG (5 tasks), hourly freshness, weekly log purge, pattern analysis | 8 tasks |
-| **Reference Data** | Version-controlled seeds for ticket types, payment methods, LTV tiers, segments | 4 seeds |
+| **Reference Data** | Version-controlled seeds for ticket types, payment methods, LTV tiers, segments, marketing channels, marketing data | 8 seeds |
 | **Developer Experience** | CONTRIBUTING.md, VQR workflow, .sqlfluff, trunk-based dev, Terraform IaC | ✅ |
 
 ---
@@ -31,12 +31,12 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 - [Data Sources](#data-sources)
 - [Data Layers](#data-layers)
 - [Models](#models)
-  - [Staging](#staging-6-models)
-  - [Silver](#silver-6-models)
-  - [Gold Dimensions](#gold-dimensions-8-models)
-  - [Gold Facts](#gold-facts-14-models)
-  - [Gold Reports](#gold-reports-7-models)
-  - [ML Features](#ml-features-11-models)
+  - [Staging](#staging-9-models)
+  - [Silver](#silver-9-models)
+  - [Gold Dimensions](#gold-dimensions-9-models)
+  - [Gold Facts](#gold-facts-21-models)
+  - [Gold Reports](#gold-reports-8-models)
+  - [ML Features](#ml-features-14-models)
 - [Semantic Views](#semantic-views)
 - [Cortex Agent](#cortex-agent)
 - [Verified Query Framework](#verified-query-framework)
@@ -84,10 +84,11 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 │                                      │                           │
 │                                      ▼                           │
 │                          SEMANTIC VIEWS (Cortex Analyst / PBI)    │
-│                      ┌─────────────────────────────────────┐      │
-│                      │ SV_MUSEUM_OPERATIONS (13 entities)  │      │
-│                      │ SV_DONOR_RETENTION   (6 entities)   │      │
-│                      └─────────────────────────────────────┘      │
+│                      ┌──────────────────────────────────────────┐ │
+│                      │ SV_MUSEUM_OPERATIONS    (13 entities)    │ │
+│                      │ SV_DONOR_RETENTION      (6 entities)     │ │
+│                      │ MARKETING_PERFORMANCE_SV (3 entities)    │ │
+│                      └──────────────────────────────────────────┘ │
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -242,10 +243,10 @@ museum-dbt/
 │   └── workflows/
 │       └── dbt-ci.yml         # Slim CI pipeline
 ├── models/
-│   ├── staging/               # Views over bronze sources (6 models)
+│   ├── staging/               # Views over bronze sources (9 models)
 │   │   ├── sources.yml        # Source definitions + freshness + tests
 │   │   └── stg_*.sql
-│   ├── silver/                # Incremental cleansed models (6 models)
+│   ├── silver/                # Incremental cleansed models (9 models)
 │   │   ├── schema.yml         # Column tests, data quality generics
 │   │   └── silver_*.sql
 │   ├── gold/
@@ -304,6 +305,9 @@ Defined in `models/staging/sources.yml`:
 | bronze | `raw_ticket_scans` | Gate entry scan logs |
 | bronze | `raw_ticket_capacity` | Capacity by date/window/type (19,200 rows) |
 | bronze | `raw_customer_identifiers` | Identity graph linking customers via email and phone across systems |
+| bronze | `raw_google_analytics` | Google Analytics session-level data with traffic source attribution |
+| bronze | `raw_google_ads` | Google Ads daily ad performance metrics |
+| bronze | `raw_meta_ads` | Meta (Facebook/Instagram) Ads daily ad performance metrics |
 
 All sources have:
 - `not_null` and `unique` tests on primary keys
@@ -332,7 +336,7 @@ All sources have:
 
 ## Models
 
-### Staging (6 models)
+### Staging (9 models)
 
 | Model | Source | Key Transformations |
 |-------|--------|---------------------|
@@ -342,8 +346,11 @@ All sources have:
 | `stg_sf_marketing_cloud` | raw_sf_marketing_cloud | Trim campaign names, lowercase email, hashdiff |
 | `stg_ticket_scans` | raw_ticket_scans | Hashdiff on scan attributes |
 | `stg_ticket_capacity` | raw_ticket_capacity | Passthrough with hashdiff |
+| `stg_google_analytics` | raw_google_analytics | Lowercase source/medium/event, hashdiff |
+| `stg_google_ads` | raw_google_ads | Cost micros → dollars conversion, hashdiff |
+| `stg_meta_ads` | raw_meta_ads | Lowercase platform/placement, hashdiff |
 
-### Silver (6 models)
+### Silver (9 models)
 
 | Model | Key Logic |
 |-------|-----------|
@@ -353,8 +360,11 @@ All sources have:
 | `silver_sf_marketing_cloud` | Event date extraction, is_bounced/is_unsubscribed flags |
 | `silver_ticket_scans` | scan_date/scan_hour extraction, is_valid_scan derivation |
 | `silver_ticket_inventory` | Capacity vs reservations join, utilization %, demand level classification |
+| `silver_google_analytics` | Channel grouping derivation, page categorization, is_conversion flag |
+| `silver_google_ads` | Cost per conversion, ROAS calculation, campaign categorization |
+| `silver_meta_ads` | CPC, CPA, ROAS calculation, campaign categorization |
 
-### Gold Dimensions (8 models)
+### Gold Dimensions (9 models)
 
 | Model | Grain | Key Attributes |
 |-------|-------|----------------|
@@ -366,8 +376,9 @@ All sources have:
 | `dim_payment_method` | 1 row per method | Payment category (Card/Cash/Digital), is_electronic |
 | `dim_product` | 1 row per SKU | Category, price tier (Premium/Mid-Range/Value), product group |
 | `dim_ticket_type` | 1 row per ticket type | Visitor category, pricing tier, is_free_admission, is_special_exhibition |
+| `dim_marketing_channel` | 1 row per channel | Paid/owned/earned classification, cost model, channel group |
 
-### Gold Facts (14 models)
+### Gold Facts (21 models)
 
 | Model | Grain | Key Metrics |
 |-------|-------|-------------|
@@ -385,8 +396,15 @@ All sources have:
 | `fct_member_360` | 1 row per contact | Unified view: tickets + retail + donations + email engagement |
 | `fct_donor_retention` | 1 row per cohort+month+segment | retention_rate_pct, churn_rate_pct by cohort month, membership type, donor tier |
 | `fct_donor_cohort_survival` | 1 row per cohort+period | Survival analysis with half-life detection and cohort health scoring |
+| `fct_digital_ad_performance` | 1 row per campaign+adgroup+date+platform | Unified Google Ads + Meta Ads: impressions, clicks, spend, conversions, ROAS, CTR, CPC, reach, frequency |
+| `fct_website_traffic` | 1 row per date+channel+campaign+page+device | GA sessions, conversions, unique users, avg duration, conversion rate |
+| `fct_ad_campaign_daily` | 1 row per campaign+platform+date | Campaign-level daily summary: spend, conversions, ROAS, active ads/ad groups |
+| `fct_marketing_channel_summary` | 1 row per date+channel | Unified cross-channel: impressions, clicks, spend, conversions, CPA, ROAS |
+| `fct_website_funnel` | 1 row per date+channel+device | Page progression funnel, drop-off rates, conversion rates |
+| `bridge_session_customer` | 1 row per session+customer match | Links converting GA sessions to identity-resolved customers |
+| `fct_ticket_utilization` | 1 row per ticket (deprecated) | Superseded by fct_ticket_sales |
 
-### Gold Reports (7 models)
+### Gold Reports (8 models)
 
 Pre-joined views optimized for dashboard consumption with full dimension attributes:
 
@@ -395,24 +413,28 @@ Pre-joined views optimized for dashboard consumption with full dimension attribu
 - `rpt_retail_performance` — Retail: line-item level with dim_product, dim_payment_method, dim_customer joins
 - `rpt_campaign_performance` — Campaign: metrics with dim_campaign type/tier + dim_date fiscal context
 - `rpt_member_360` — Members: identity-resolved with ticket + retail spend from new fact tables, LTV tier
-- `rpt_customer_ltv` — **NEW:** Unified LTV (tickets + retail + donations) with tier (Platinum/Gold/Silver/Bronze), tenure, avg spend
-- `rpt_ticket_sales` — **NEW:** Full star-schema tickets with role-playing dates, all dim attributes joined
+- `rpt_customer_ltv` — Unified LTV (tickets + retail + donations) with tier (Platinum/Gold/Silver/Bronze), tenure, avg spend
+- `rpt_ticket_sales` — Full star-schema tickets with role-playing dates, all dim attributes joined
+- `rpt_digital_marketing` — Digital marketing: ad performance + website traffic joined with fiscal date context
 
-### ML Features (11 models)
+### ML Features (14 models)
 
 | Model | Target Use Case | Key Features |
 |-------|-----------------|--------------|
-| `ml_daily_visitor_features` | Visitor forecasting | 7/30-day rolling avgs, peak hour, day-of-week, same-day-last-week lag |
+| `ml_daily_visitor_features` | Visitor forecasting | 7/30-day rolling avgs, peak hour, day-of-week, same-day-last-week lag, ad spend, web sessions |
 | `ml_ticket_demand_features` | Ticket demand prediction | Demand level encoding, rolling utilization, z-scores |
 | `ml_donor_churn_features` | Donor churn prediction | tenure_months, donation_velocity, recency_band, is_churned label |
 | `ml_member_churn_features` | Member churn risk | days_since_last_interaction, email_click_through_rate, churn_risk_flag |
 | `ml_ticket_no_show_features` | Ticket no-show prediction | Customer no-show history, ticket type base rate, purchase hour, anonymity |
 | `ml_retail_cross_sell_features` | Product cross-sell | Co-occurrence matrix, Jaccard similarity, lift scores |
 | `ml_email_send_time_features` | Send time optimization | Preferred open hour, hours-from-preferred distance, time buckets |
-| `ml_campaign_response_features` | Campaign response scoring | Open/click rates, LTV tier, engagement signals, customer segment |
+| `ml_campaign_response_features` | Campaign response scoring | Open/click rates, LTV tier, email web sessions, paid search/social signals |
 | `ml_dynamic_pricing_features` | Dynamic pricing | Demand z-score, utilization band, benchmark comparison, suggested multiplier (0.85x–1.25x) |
 | `ml_donor_upgrade_propensity_features` | Donor upgrade propensity | Monthly value velocity, spend-to-next-tier gap, engagement, tenure |
 | `ml_visitor_forecast_training` | Visitor forecast (Snowflake ML) | Time-series format (ds/y) for FORECAST model |
+| `ml_ad_budget_optimization_features` | Ad budget allocation | ROAS trends, spend share, performance tiers, budget recommendations |
+| `ml_marketing_attribution_features` | Multi-touch attribution | First/last touch channels, conversion paths, days to convert, path length tiers |
+| `ml_ad_creative_features` | Creative performance | CTR/ROAS rolling avgs, cumulative efficiency, performance tiers by placement |
 
 ---
 
@@ -713,7 +735,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## Semantic Views
 
-Two semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
+Three semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
 
 ### `MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS`
 
@@ -734,9 +756,20 @@ Donor lifecycle analytics and ticket capacity planning.
 - **16 metrics** covering retention rates, survival curves, capacity utilization, demand benchmarks
 - **4 verified queries**
 
+### `MUSEUM_DW_PROD.GOLD.MARKETING_PERFORMANCE_SV`
+
+Digital marketing performance across paid advertising, email campaigns, and website analytics.
+
+- **6 entities:** ad_performance (Google Ads + Meta Ads), website_traffic (Google Analytics), email_campaigns (SFMC), channel_summary, channels (dim), dates
+- **21 metrics** covering impressions, clicks, spend, conversions, ROAS, CTR, CPC, reach, frequency, sessions, email open/click/bounce rates
+- **17 dimensions:** ad platform, campaign category, channel grouping, page category, device, placement, channel group (paid/owned/earned)
+- **5 verified queries** (ROAS by platform, top campaigns, weekend vs weekday CTR, cross-channel comparison, website funnel)
+- **AI instructions:** Rounds to 2 decimal places, splits platforms, uses fiscal year by default
+- **DDL location:** `analyses/create_marketing_semantic_view.sql`
+
 ### Access
 
-Both views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views connector.
+All views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views connector.
 
 ---
 

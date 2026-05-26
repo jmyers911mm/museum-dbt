@@ -1,0 +1,21 @@
+ad_id,campaign_id,campaign_name,ad_group_name,ad_date,impressions,clicks,cost_micros,conversions,conversion_value,click_through_rate,cost_per_click,keyword,match_type,device,network
+GAD-001,GC-001,Winter Campaign,Tickets - General,2025-11-01,12500,375,562500000,12,480.00,0.030,1.50,museum tickets nyc,BROAD,DESKTOP,SEARCH
+GAD-002,GC-001,Winter Campaign,Tickets - General,2025-11-01,8200,246,369000000,8,320.00,0.030,1.50,911 memorial tickets,EXACT,MOBILE,SEARCH
+GAD-003,GC-002,Membership Drive,Membership - Acquisition,2025-11-01,5400,108,270000000,3,450.00,0.020,2.50,museum membership nyc,BROAD,DESKTOP,SEARCH
+GAD-004,GC-003,Holiday Promo,Gift Shop - Holiday,2025-11-01,15000,225,168750000,5,175.00,0.015,0.75,museum gift shop,BROAD,MOBILE,DISPLAY
+GAD-005,GC-001,Winter Campaign,Tickets - General,2025-11-02,13100,393,589500000,14,560.00,0.030,1.50,museum tickets nyc,BROAD,DESKTOP,SEARCH
+GAD-006,GC-001,Winter Campaign,Tickets - General,2025-11-02,9000,270,405000000,9,360.00,0.030,1.50,911 memorial tickets,EXACT,MOBILE,SEARCH
+GAD-007,GC-002,Membership Drive,Membership - Acquisition,2025-11-02,4800,96,240000000,2,300.00,0.020,2.50,museum membership nyc,BROAD,DESKTOP,SEARCH
+GAD-008,GC-003,Holiday Promo,Gift Shop - Holiday,2025-11-02,16200,243,182250000,6,210.00,0.015,0.75,museum gift shop,BROAD,MOBILE,DISPLAY
+GAD-009,GC-001,Winter Campaign,Tickets - General,2025-11-03,11800,354,531000000,11,440.00,0.030,1.50,museum tickets nyc,BROAD,DESKTOP,SEARCH
+GAD-010,GC-001,Winter Campaign,Tickets - General,2025-11-03,7600,228,342000000,7,280.00,0.030,1.50,911 memorial tickets,EXACT,MOBILE,SEARCH
+GAD-011,GC-002,Membership Drive,Membership - Acquisition,2025-11-03,5100,102,255000000,3,450.00,0.020,2.50,museum membership nyc,BROAD,DESKTOP,SEARCH
+GAD-012,GC-003,Holiday Promo,Gift Shop - Holiday,2025-11-03,14500,217,162750000,4,140.00,0.015,0.75,museum gift shop,BROAD,TABLET,DISPLAY
+GAD-013,GC-001,Winter Campaign,Tickets - General,2025-11-04,14200,426,639000000,15,600.00,0.030,1.50,museum tickets nyc,BROAD,DESKTOP,SEARCH
+GAD-014,GC-001,Winter Campaign,Tickets - General,2025-11-04,9500,285,427500000,10,400.00,0.030,1.50,911 memorial tickets,EXACT,MOBILE,SEARCH
+GAD-015,GC-002,Membership Drive,Membership - Acquisition,2025-11-04,6000,120,300000000,4,600.00,0.020,2.50,museum membership nyc,PHRASE,DESKTOP,SEARCH
+GAD-016,GC-003,Holiday Promo,Gift Shop - Holiday,2025-11-04,17800,267,200250000,7,245.00,0.015,0.75,museum gift shop,BROAD,MOBILE,DISPLAY
+GAD-017,GC-001,Winter Campaign,Tickets - General,2025-11-05,12000,360,540000000,12,480.00,0.030,1.50,museum tickets nyc,BROAD,DESKTOP,SEARCH
+GAD-018,GC-002,Membership Drive,Membership - Acquisition,2025-11-05,5500,110,275000000,3,450.00,0.020,2.50,museum membership,BROAD,MOBILE,SEARCH
+GAD-019,GC-001,Winter Campaign,Tickets - General,2025-11-06,10500,315,472500000,10,400.00,0.030,1.50,911 memorial,BROAD,DESKTOP,SEARCH
+GAD-020,GC-003,Holiday Promo,Gift Shop - Holiday,2025-11-06,18500,277,207750000,8,280.00,0.015,0.75,museum gifts,BROAD,MOBILE,DISPLAY

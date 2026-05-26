@@ -202,3 +202,30 @@ models:
         tests:
           - accepted_values:
               values: ['Membership', 'Fundraising', 'Newsletter', 'Retail Promotion', 'Exhibition Promotion', 'General']
+
+  - name: dim_marketing_channel
+    description: Marketing channel dimension with paid/owned/earned classification
+    config:
+      contract:
+        enforced: false
+    columns:
+      - name: channel_id
+        description: Channel identifier
+        tests:
+          - unique
+          - not_null
+      - name: channel_name
+        description: Channel name
+        tests:
+          - unique
+          - not_null
+      - name: is_paid
+        description: Whether this is a paid channel
+        tests:
+          - not_null
+      - name: channel_group
+        description: Ownership classification (Paid, Owned, Earned, Other)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Paid', 'Owned', 'Earned', 'Other']

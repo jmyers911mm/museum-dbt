@@ -132,3 +132,64 @@ models:
         description: Target variable - daily visitor count
         tests:
           - not_null
+
+  - name: ml_ad_budget_optimization_features
+    description: Platform and campaign category level features for optimizing ad budget allocation. Includes ROAS trends, spend share, and budget recommendations.
+    meta:
+      owner: Data Science
+      ml_target: budget_recommendation (classification), roas (regression)
+      business_value: Optimize ad spend allocation across platforms and campaign types
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: ad_platform
+        tests:
+          - not_null
+      - name: performance_tier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['high_performer', 'moderate_performer', 'low_performer', 'no_conversions']
+
+  - name: ml_marketing_attribution_features
+    description: Multi-touch attribution features with first/last touch channels and conversion path analysis for converting users.
+    meta:
+      owner: Data Science
+      ml_target: conversion_path_length_tier (classification), days_to_convert (regression)
+      business_value: Understand which channels drive conversions and optimize marketing mix
+    columns:
+      - name: user_pseudo_id
+        tests:
+          - not_null
+          - unique
+      - name: first_touch_channel
+        tests:
+          - not_null
+      - name: last_touch_channel
+        tests:
+          - not_null
+      - name: conversion_path_length_tier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['direct_conversion', 'short_path', 'medium_path', 'long_path']
+
+  - name: ml_ad_creative_features
+    description: Ad creative-level performance features with rolling averages and performance tier classification.
+    meta:
+      owner: Data Science
+      ml_target: creative_performance_tier (classification), roas (regression)
+      business_value: Identify top-performing creatives and placements for budget allocation
+    columns:
+      - name: ad_id
+        tests:
+          - not_null
+      - name: ad_date
+        tests:
+          - not_null
+      - name: creative_performance_tier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['top_performer', 'good_performer', 'underperformer', 'poor_performer']

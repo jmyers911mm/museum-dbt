@@ -1,4 +1,28 @@
-WITH daily_ops AS (
+WITH marketing_signals AS (
+    SELECT
+        report_date,
+        SUM(impressions) AS total_ad_impressions,
+        SUM(clicks) AS total_ad_clicks,
+        SUM(spend) AS total_ad_spend,
+        SUM(conversions) AS total_ad_conversions,
+        SUM(conversion_value) AS total_ad_conversion_value
+    FROM {{ ref('fct_digital_ad_performance') }}
+    GROUP BY report_date
+),
+
+web_traffic_signals AS (
+    SELECT
+        report_date,
+        SUM(sessions) AS total_web_sessions,
+        SUM(new_user_sessions) AS total_new_user_sessions,
+        SUM(conversions) AS total_web_conversions,
+        SUM(unique_users) AS total_unique_web_users,
+        AVG(avg_session_duration_seconds) AS avg_session_duration
+    FROM {{ ref('fct_website_traffic') }}
+    GROUP BY report_date
+),
+
+daily_ops AS (
     SELECT
         visit_date,
         total_visitors AS daily_visitors,
@@ -69,7 +93,20 @@ SELECT
     AVG(d.daily_visitors) OVER (ORDER BY d.visit_date ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING) AS avg_visitors_30d,
     AVG(d.total_daily_revenue) OVER (ORDER BY d.visit_date ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS avg_revenue_7d,
     LAG(d.daily_visitors, 7) OVER (ORDER BY d.visit_date) AS visitors_same_day_last_week,
+    COALESCE(ms.total_ad_impressions, 0) AS ad_impressions,
+    COALESCE(ms.total_ad_clicks, 0) AS ad_clicks,
+    COALESCE(ms.total_ad_spend, 0) AS ad_spend,
+    COALESCE(ms.total_ad_conversions, 0) AS ad_conversions,
+    COALESCE(wt.total_web_sessions, 0) AS web_sessions,
+    COALESCE(wt.total_new_user_sessions, 0) AS web_new_user_sessions,
+    COALESCE(wt.total_web_conversions, 0) AS web_conversions,
+    COALESCE(wt.total_unique_web_users, 0) AS web_unique_users,
+    COALESCE(wt.avg_session_duration, 0) AS web_avg_session_duration,
+    AVG(COALESCE(ms.total_ad_spend, 0)) OVER (ORDER BY d.visit_date ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS avg_ad_spend_7d,
+    AVG(COALESCE(wt.total_web_sessions, 0)) OVER (ORDER BY d.visit_date ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS avg_web_sessions_7d,
     CURRENT_TIMESTAMP() AS _feature_computed_at
 FROM daily_ops d
 LEFT JOIN hourly_traffic h ON d.visit_date = h.scan_date
 LEFT JOIN date_features df ON d.visit_date = df.date_day
+LEFT JOIN marketing_signals ms ON d.visit_date = ms.report_date
+LEFT JOIN web_traffic_signals wt ON d.visit_date = wt.report_date

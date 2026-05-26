@@ -2,6 +2,70 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.6.0] - 2026-05-26
+
+### Digital Marketing Integration
+
+**New Sources (3)**
+- Added `raw_google_analytics` — Google Analytics session-level data with traffic source attribution
+- Added `raw_google_ads` — Google Ads daily ad performance metrics
+- Added `raw_meta_ads` — Meta (Facebook/Instagram) Ads daily ad performance metrics
+
+**New Seeds (4)**
+- `raw_google_analytics.csv` — 20 sample GA sessions with varied sources/mediums
+- `raw_google_ads.csv` — 20 sample ad performance records across 3 campaigns
+- `raw_meta_ads.csv` — 20 sample Meta ad records across Facebook/Instagram
+- `ref_marketing_channels.csv` — 7 marketing channel reference records
+
+**New Staging Models (3)**
+- `stg_google_analytics` — Lowercase/trim source fields, hashdiff
+- `stg_google_ads` — Cost micros to dollars conversion, hashdiff
+- `stg_meta_ads` — Lowercase platform/placement, hashdiff
+
+**New Silver Models (3)**
+- `silver_google_analytics` — Channel grouping derivation, page categorization, is_conversion flag
+- `silver_google_ads` — Cost per conversion, ROAS, campaign categorization (Tickets/Membership/Retail/General)
+- `silver_meta_ads` — CPC, CPA, ROAS, campaign categorization (Membership/Promotions/Awareness/General)
+
+**New Gold Dimension Models (1)**
+- `dim_marketing_channel` — Seed-based channel dimension with paid/owned/earned classification
+
+**New Gold Fact Models (5)**
+- `fct_digital_ad_performance` — Unified Google Ads + Meta Ads with reach/frequency (updated with reach/frequency)
+- `fct_website_traffic` — Daily website traffic by channel, campaign, page category, device
+- `fct_ad_campaign_daily` — Campaign-level daily summary across platforms
+- `fct_marketing_channel_summary` — Unified cross-channel daily performance (paid search, paid social, paid display, email, organic, direct)
+- `fct_website_funnel` — Page progression funnel with drop-off rates by channel and device
+- `bridge_session_customer` — Bridge linking converting GA sessions to identity-resolved customers
+
+**New Gold Report Models (1)**
+- `rpt_digital_marketing` — Combined ad performance + website traffic with fiscal date context
+
+**New ML Feature Models (3)**
+- `ml_ad_budget_optimization_features` — ROAS trends, spend share, performance tiers, budget recommendations
+- `ml_marketing_attribution_features` — Multi-touch attribution with first/last touch, channel paths, conversion path tiers
+- `ml_ad_creative_features` — Creative-level performance with rolling averages, cumulative efficiency, performance tiers
+
+**Updated ML Feature Models (2)**
+- `ml_daily_visitor_features` — Added ad spend, impressions, web sessions, and rolling marketing averages as exogenous features
+- `ml_campaign_response_features` — Added email-driven web sessions, paid search/social session counts
+
+**New Semantic View (1)**
+- `MARKETING_PERFORMANCE_SV` — Expanded to 6 entities (ad_performance, website_traffic, email_campaigns, channel_summary, channels, dates), 21 metrics, 17 dimensions. Added email campaigns, reach/frequency, cross-channel summary.
+
+**New Verified Queries (5)**
+- `roas_by_platform` — ROAS by advertising platform this month
+- `top_campaigns_by_spend` — Top 10 campaigns by total spend
+- `weekend_vs_weekday_ctr` — CTR comparison weekends vs weekdays
+- `cross_channel_comparison` — All channels: spend, conversions, ROAS
+- `website_conversion_funnel` — Funnel by traffic channel
+
+**Testing**
+- Added 54+ new schema tests for all new/modified models
+- Tests cover: not_null, unique, accepted_values, hashdiff_integrity
+
+---
+
 ## [2.5.0] - 2026-05-25
 
 ### Infrastructure & Access
