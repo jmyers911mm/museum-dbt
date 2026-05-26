@@ -1,0 +1,8 @@
+channel_id,channel_name,display_name,is_paid,cost_model,channel_group
+CH-001,Paid Search,Google Search Ads,true,CPC,Paid
+CH-002,Paid Display,Google Display Network,true,CPM,Paid
+CH-003,Paid Social,Meta Ads (Facebook + Instagram),true,CPM,Paid
+CH-004,Email,Email Marketing (SFMC),false,None,Owned
+CH-005,Organic Search,Google Organic,false,None,Earned
+CH-006,Direct,Direct Traffic,false,None,Owned
+CH-007,Other,Other/Unattributed,false,None,Other

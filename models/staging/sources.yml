@@ -185,3 +185,97 @@ sources:
             description: Maximum number of tickets available for this window
             tests:
               - not_null
+
+      - name: raw_google_analytics
+        description: Google Analytics session-level data with traffic source attribution
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        columns:
+          - name: session_id
+            description: Unique session identifier
+            tests:
+              - not_null
+              - unique
+          - name: session_date
+            description: Date of the session
+            tests:
+              - not_null
+          - name: source
+            description: Traffic source (google, facebook, direct, etc.)
+            tests:
+              - not_null
+          - name: medium
+            description: Traffic medium (organic, cpc, paid, etc.)
+            tests:
+              - not_null
+          - name: event_name
+            description: Primary event for this session
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['page_view', 'purchase', 'add_to_cart', 'begin_checkout']
+
+      - name: raw_google_ads
+        description: Google Ads daily ad performance metrics
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        columns:
+          - name: ad_id
+            description: Unique ad identifier
+            tests:
+              - not_null
+          - name: campaign_id
+            description: Google Ads campaign identifier
+            tests:
+              - not_null
+          - name: ad_date
+            description: Date of the ad performance record
+            tests:
+              - not_null
+          - name: impressions
+            description: Number of ad impressions
+            tests:
+              - not_null
+          - name: clicks
+            description: Number of ad clicks
+            tests:
+              - not_null
+          - name: cost_micros
+            description: Cost in micros (divide by 1,000,000 for actual cost)
+            tests:
+              - not_null
+
+      - name: raw_meta_ads
+        description: Meta (Facebook/Instagram) Ads daily ad performance metrics
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        columns:
+          - name: ad_id
+            description: Unique ad identifier
+            tests:
+              - not_null
+          - name: campaign_id
+            description: Meta campaign identifier
+            tests:
+              - not_null
+          - name: ad_date
+            description: Date of the ad performance record
+            tests:
+              - not_null
+          - name: platform
+            description: Meta platform (facebook or instagram)
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['facebook', 'instagram']
+          - name: impressions
+            description: Number of ad impressions
+            tests:
+              - not_null
+          - name: spend
+            description: Amount spent in dollars
+            tests:
+              - not_null

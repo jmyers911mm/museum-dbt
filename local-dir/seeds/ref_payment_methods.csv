@@ -1,5 +1,0 @@
-payment_method_id,payment_method_name,payment_category,is_electronic
-Cash,Cash,Cash,false
-Credit Card,Credit Card,Card,true
-Debit Card,Debit Card,Card,true
-Mobile Pay,Mobile Pay,Digital,true

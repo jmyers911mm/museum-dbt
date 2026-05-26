@@ -335,4 +335,98 @@ Verified queries live in `analyses/verified_queries/` organized by business doma
 
 ---
 
+## Snowsight Workspace ↔ GitHub Sync
+
+The shared workspace (`MUSEUM_DW_DEV.PUBLIC."museum-dbt"`) does **not** have direct Git push/pull. All code changes must go through GitHub before being published to other users.
+
+### Golden Rule
+
+**Never click "Publish Changes" in Snowsight until your PR has been merged in GitHub.**
+
+Publishing makes your edits visible to all workspace users. If you publish unreviewed code, you bypass the PR process.
+
+### Pushing Changes to GitHub
+
+```bash
+# 1. Download your workspace edits to your local clone
+snow stage copy "snow://workspace/MUSEUM_DW_DEV.PUBLIC.""museum-dbt""/versions/live/" C:\Users\<your-username>\museum-dbt\ --recursive
+
+# 2. Create a feature branch
+cd C:\Users\<your-username>\museum-dbt
+git checkout main && git pull
+git checkout -b feature/your-change-description
+
+# 3. Stage, commit, push
+git add .
+git commit -m "feat: describe your changes"
+git push -u origin feature/your-change-description
+
+# 4. Open a PR at https://github.com/jmyers911mm/museum-dbt/pulls
+```
+
+### After Your PR is Merged
+
+```sql
+-- Sync the Snowflake Git repo with GitHub
+ALTER GIT REPOSITORY MUSEUM_DW_DEV.PUBLIC.museum_dbt_repo FETCH;
+```
+
+Then click **"Publish Changes"** in Snowsight to make the merged code live for all workspace users.
+
+### Checking Your Status
+
+| Question | How to check |
+|----------|-------------|
+| Am I up to date with `main`? | `git fetch origin && git status` — look for "up to date" vs "behind" |
+| Do I have unpushed local changes? | `git status` — "ahead" means you have commits that need a PR |
+| Do I have unpublished Snowsight edits? | Look for the "Publish Changes" button in the workspace |
+| Is the Snowflake Git repo current? | `ALTER GIT REPOSITORY MUSEUM_DW_DEV.PUBLIC.museum_dbt_repo FETCH;` — "No change" means current |
+| Do I need to pull? | `git pull origin main` to get the latest merged code |
+
+### Snowflake CLI Setup
+
+Your `%USERPROFILE%\.snowflake\config.toml` must be configured:
+
+```toml
+[connections.default]
+account = "om01578.east-us.azure"
+user = "YOURUSER@911MEMORIAL.ORG"
+password = "your_password"
+role = "ACCOUNTADMIN"
+warehouse = "COMPUTE_WH"
+database = "MUSEUM_DW_DEV"
+schema = "PUBLIC"
+```
+
+Test with: `snow connection test`
+
+### Workflow Diagram
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  YOU (in Snowsight workspace)                                │
+│  Edit files → DO NOT publish yet                             │
+└──────────────┬───────────────────────────────────────────────┘
+               │ snow stage copy (download)
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│  YOUR LOCAL MACHINE                                          │
+│  git checkout -b feature/... → git add → git commit → push  │
+└──────────────┬───────────────────────────────────────────────┘
+               │ git push
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│  GITHUB                                                      │
+│  Open PR → Review → Approve → Merge to main                 │
+└──────────────┬───────────────────────────────────────────────┘
+               │ merged
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│  SNOWFLAKE                                                   │
+│  ALTER GIT REPOSITORY ... FETCH → Publish Changes            │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## SQL Style Guide

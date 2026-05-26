@@ -1,0 +1,21 @@
+ad_id,campaign_id,campaign_name,adset_name,ad_name,ad_date,platform,impressions,reach,clicks,spend,actions_link_click,actions_purchase,actions_purchase_value,cpm,ctr,frequency,objective,placement
+META-001,MC-001,Holiday Promo FB,NYC Visitors 25-54,Carousel - Tickets,2025-11-01,facebook,28000,22000,420,350.00,380,8,320.00,12.50,0.015,1.27,CONVERSIONS,feed
+META-002,MC-001,Holiday Promo FB,NYC Visitors 25-54,Video - Museum Tour,2025-11-01,facebook,35000,28000,525,437.50,490,5,200.00,12.50,0.015,1.25,CONVERSIONS,feed
+META-003,MC-002,Awareness Q4,Lookalike - Past Visitors,Static - Exhibition,2025-11-01,facebook,45000,38000,315,225.00,280,2,80.00,5.00,0.007,1.18,AWARENESS,feed
+META-004,MC-003,Holiday Promo IG,NYC Culture Interest,Reel - Holiday Gift,2025-11-01,instagram,22000,18000,440,330.00,400,6,210.00,15.00,0.020,1.22,CONVERSIONS,reels
+META-005,MC-001,Holiday Promo FB,NYC Visitors 25-54,Carousel - Tickets,2025-11-02,facebook,30000,24000,450,375.00,410,9,360.00,12.50,0.015,1.25,CONVERSIONS,feed
+META-006,MC-002,Awareness Q4,Lookalike - Past Visitors,Static - Exhibition,2025-11-02,facebook,48000,40000,336,240.00,300,3,120.00,5.00,0.007,1.20,AWARENESS,feed
+META-007,MC-003,Holiday Promo IG,NYC Culture Interest,Reel - Holiday Gift,2025-11-02,instagram,25000,20000,500,375.00,460,7,245.00,15.00,0.020,1.25,CONVERSIONS,reels
+META-008,MC-004,Membership FB,Donor Lookalike,Static - Join Today,2025-11-02,facebook,18000,15000,270,315.00,240,4,600.00,17.50,0.015,1.20,CONVERSIONS,feed
+META-009,MC-001,Holiday Promo FB,NYC Visitors 25-54,Video - Museum Tour,2025-11-03,facebook,32000,26000,480,400.00,440,6,240.00,12.50,0.015,1.23,CONVERSIONS,feed
+META-010,MC-002,Awareness Q4,Lookalike - Past Visitors,Static - Exhibition,2025-11-03,facebook,42000,35000,294,210.00,260,2,80.00,5.00,0.007,1.20,AWARENESS,feed
+META-011,MC-003,Holiday Promo IG,NYC Culture Interest,Carousel - Gifts,2025-11-03,instagram,20000,16000,400,300.00,360,5,175.00,15.00,0.020,1.25,CONVERSIONS,stories
+META-012,MC-004,Membership FB,Donor Lookalike,Video - Member Benefits,2025-11-03,facebook,20000,16500,300,350.00,270,5,750.00,17.50,0.015,1.21,CONVERSIONS,feed
+META-013,MC-001,Holiday Promo FB,NYC Visitors 25-54,Carousel - Tickets,2025-11-04,facebook,33000,27000,495,412.50,450,10,400.00,12.50,0.015,1.22,CONVERSIONS,feed
+META-014,MC-003,Holiday Promo IG,NYC Culture Interest,Reel - Holiday Gift,2025-11-04,instagram,27000,22000,540,405.00,500,8,280.00,15.00,0.020,1.23,CONVERSIONS,reels
+META-015,MC-004,Membership FB,Donor Lookalike,Static - Join Today,2025-11-04,facebook,19000,16000,285,332.50,255,4,600.00,17.50,0.015,1.19,CONVERSIONS,feed
+META-016,MC-002,Awareness Q4,Lookalike - Past Visitors,Video - Museum Story,2025-11-04,facebook,50000,42000,350,250.00,310,3,120.00,5.00,0.007,1.19,AWARENESS,feed
+META-017,MC-001,Holiday Promo FB,NYC Visitors 25-54,Video - Museum Tour,2025-11-05,facebook,31000,25000,465,387.50,425,7,280.00,12.50,0.015,1.24,CONVERSIONS,feed
+META-018,MC-003,Holiday Promo IG,NYC Culture Interest,Carousel - Gifts,2025-11-05,instagram,24000,19000,480,360.00,440,6,210.00,15.00,0.020,1.26,CONVERSIONS,stories
+META-019,MC-004,Membership FB,Donor Lookalike,Video - Member Benefits,2025-11-05,facebook,21000,17500,315,367.50,280,5,750.00,17.50,0.015,1.20,CONVERSIONS,feed
+META-020,MC-002,Awareness Q4,Lookalike - Past Visitors,Static - Exhibition,2025-11-05,facebook,46000,39000,322,230.00,285,2,80.00,5.00,0.007,1.18,AWARENESS,feed
