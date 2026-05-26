@@ -1,0 +1,82 @@
+name: 'museum_dbt'
+version: '1.0.0'
+config-version: 2
+profile: 'museum_dbt'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests/reconciliation", "tests/referential_integrity", "tests/business_rules"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  skip_circuit_breaker: false
+
+
+
+models:
+  +persist_docs:
+    relation: true
+    columns: true
+  +pre-hook:
+    - "ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = 3600"
+    - "{% if 'intraday' in model.tags %}ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = 300{% endif %}"
+  museum_dbt:
+    staging:
+      +materialized: view
+      +schema: SILVER
+      +tags: ['daily', 'critical']
+      +query_tag: 'dbt_museum_staging'
+      +group: staging
+    silver:
+      +materialized: incremental
+      +schema: SILVER
+      +incremental_strategy: merge
+      +on_schema_change: append_new_columns
+      +tags: ['daily', 'critical']
+      +query_tag: 'dbt_museum_silver'
+      +copy_grants: true
+      +transient: true
+      +group: silver
+    gold:
+      +materialized: incremental
+      +schema: GOLD
+      +incremental_strategy: merge
+      +on_schema_change: append_new_columns
+      +tags: ['daily', 'critical']
+      +query_tag: 'dbt_museum_gold'
+      +copy_grants: true
+      +post-hook:
+        - "GRANT SELECT ON {{ this }} TO ROLE POWERBI_ROLE"
+        - "GRANT SELECT ON {{ this }} TO ROLE ML_ROLE"
+      dimensions:
+        +materialized: table
+        +group: gold_dimensions
+        +access: public
+      facts:
+        +group: gold_facts
+        +access: public
+      reports:
+        +group: gold_reports
+        +access: public
+    ml_features:
+      +materialized: table
+      +schema: ML_FEATURES
+      +tags: ['daily', 'non-critical']
+      +query_tag: 'dbt_museum_ml_features'
+      +transient: true
+      +group: ml_features
+      +access: public
+      +post-hook:
+        - "GRANT SELECT ON {{ this }} TO ROLE ML_ROLE"
+
+snapshots:
+  museum_dbt:
+    +target_schema: SILVER
+    +tags: ['daily', 'non-critical']
+    +query_tag: 'dbt_museum_snapshots'

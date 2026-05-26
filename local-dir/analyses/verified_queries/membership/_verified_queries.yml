@@ -1,0 +1,45 @@
+verified_queries:
+  - name: ltv_by_customer_segment
+    description: >
+      Average lifetime value by customer segment (Known Member, Identified
+      Visitor, Anonymous). Core metric for identity resolution ROI.
+    file: ltv_by_customer_segment.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "What is average lifetime value by customer segment?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-005-MS-001
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [membership, ltv, identity_resolution, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: ltv_by_tier
+    description: >
+      Customer count and total LTV by value tier (Platinum/Gold/Silver/Bronze).
+      Supports donor stewardship prioritization.
+    file: ltv_by_tier.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "How many customers are in each LTV tier?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-005-MS-002
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [membership, ltv, donor_stewardship, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: customers_by_membership_type
+    description: >
+      Customer count by membership type and segment.
+      Tracks membership program health and growth.
+    file: customers_by_membership_type.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "How many customers by membership type?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-005-MS-003
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [membership, growth, certified]
+    power_bi_datasets:
+      - Membership & Donors

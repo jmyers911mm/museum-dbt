@@ -1,0 +1,75 @@
+verified_queries:
+  - name: ticket_revenue_by_type
+    description: >
+      Ticket revenue, volume, and AOV broken down by ticket type.
+      Primary pricing and product mix analysis.
+    file: ticket_revenue_by_type.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "What is ticket revenue broken down by ticket type?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-002-TS-001
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [tickets, pricing, certified]
+    power_bi_datasets:
+      - Museum Daily Operations
+
+  - name: ticket_aov_trend
+    description: >
+      Ticket average order value and tickets per transaction over trailing 3 months.
+      Monitors pricing effectiveness and upsell success.
+    file: ticket_aov_trend.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "What is the ticket average order value trend?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-002-TS-002
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [tickets, aov, trending, certified]
+    power_bi_datasets:
+      - Museum Daily Operations
+
+  - name: discount_analysis_by_type
+    description: >
+      Discount penetration rate and total discount dollars by ticket type.
+      Supports discount policy review and revenue leakage analysis.
+    file: discount_analysis_by_type.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "What percentage of tickets use discounts by type?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-002-TS-003
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [tickets, discounts, pricing, certified]
+    power_bi_datasets:
+      - Museum Daily Operations
+
+  - name: utilization_by_gate
+    description: >
+      Ticket scan utilization rate and visitors admitted per gate.
+      Identifies gates with unused tickets (no-shows) vs high throughput.
+    file: utilization_by_gate.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "What is the ticket utilization rate by gate?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-002-TS-004
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [tickets, utilization, operations, certified]
+    power_bi_datasets:
+      - Visitor Experience Operations
+
+  - name: purchase_to_entry_time
+    description: >
+      Average time between ticket purchase and gate entry by ticket type
+      and visitor category. Supports visitor flow optimization.
+    file: purchase_to_entry_time.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "How long do visitors wait between buying a ticket and entering?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-002-TS-005
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [tickets, visitor_experience, operations, certified]
+    power_bi_datasets:
+      - Visitor Experience Operations

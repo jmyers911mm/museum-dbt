@@ -1,0 +1,5 @@
+ltv_tier,min_value,max_value,description
+Platinum,1000,,Highest value customers (>=$1000 lifetime spend)
+Gold,500,999.99,High value customers ($500-$999)
+Silver,100,499.99,Medium value customers ($100-$499)
+Bronze,0,99.99,Low value or single-visit customers (<$100)

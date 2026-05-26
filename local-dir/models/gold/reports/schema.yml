@@ -1,0 +1,103 @@
+version: 2
+
+models:
+  - name: rpt_daily_operations
+    description: Daily operations report with revenue, visitors, AOV, net revenue, and revenue per visitor
+    meta:
+      owner: Operations Team
+    columns:
+      - name: visit_date
+        description: Operating date
+        tests:
+          - not_null
+      - name: total_revenue
+        tests:
+          - not_null
+      - name: net_total_revenue
+        tests:
+          - not_null
+
+  - name: rpt_ticket_sales
+    description: Full star-schema ticket report with role-playing dates (purchase + scan), all dimension attributes
+    meta:
+      owner: Operations Team
+    columns:
+      - name: ticket_number
+        description: Unique ticket barcode
+        tests:
+          - not_null
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: ticket_type
+        tests:
+          - not_null
+
+  - name: rpt_retail_performance
+    description: Line-item retail report with product, payment, and customer dimension attributes
+    meta:
+      owner: Retail Team
+    columns:
+      - name: transaction_id
+        tests:
+          - not_null
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: item_category
+        tests:
+          - not_null
+
+  - name: rpt_visitor_traffic
+    description: Hourly gate traffic with dim_gate attributes and ticket utilization per gate
+    meta:
+      owner: Operations Team
+    columns:
+      - name: scan_date
+        tests:
+          - not_null
+      - name: gate_id
+        tests:
+          - not_null
+
+  - name: rpt_campaign_performance
+    description: Campaign metrics with dim_campaign type/tier and dim_date fiscal context
+    meta:
+      owner: Marketing Team
+    columns:
+      - name: campaign_id
+        tests:
+          - not_null
+          - unique
+
+  - name: rpt_member_360
+    description: Identity-resolved member profile with ticket + retail spend, LTV tier
+    meta:
+      owner: Membership & Development Team
+      contains_pii: true
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+      - name: total_lifetime_value
+        tests:
+          - not_null
+
+  - name: rpt_customer_ltv
+    description: Unified LTV report combining tickets, retail, and donations with tier classification
+    meta:
+      owner: Membership & Development Team
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+      - name: total_lifetime_value
+        tests:
+          - not_null
+      - name: ltv_tier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Platinum', 'Gold', 'Silver', 'Bronze']

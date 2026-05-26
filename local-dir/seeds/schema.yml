@@ -1,0 +1,42 @@
+version: 2
+
+seeds:
+  - name: ref_customer_segments
+    description: Reference data for customer identity resolution segments
+    config:
+      schema: GOLD
+    columns:
+      - name: customer_segment
+        tests:
+          - unique
+          - not_null
+
+  - name: ref_payment_methods
+    description: Reference data for payment method dimension
+    config:
+      schema: GOLD
+    columns:
+      - name: payment_method_id
+        tests:
+          - unique
+          - not_null
+
+  - name: ref_ticket_types
+    description: Reference data for ticket type dimension with pricing
+    config:
+      schema: GOLD
+    columns:
+      - name: ticket_type_id
+        tests:
+          - unique
+          - not_null
+
+  - name: ref_ltv_tiers
+    description: Reference data for customer LTV tier boundaries
+    config:
+      schema: GOLD
+    columns:
+      - name: ltv_tier
+        tests:
+          - unique
+          - not_null

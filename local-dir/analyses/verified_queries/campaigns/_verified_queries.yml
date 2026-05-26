@@ -1,0 +1,15 @@
+verified_queries:
+  - name: campaign_performance_by_type
+    description: >
+      Email campaign open rates, click-to-open rates, and volume by campaign
+      type. Informs marketing channel strategy and content optimization.
+    file: campaign_performance_by_type.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    question: "Which campaign types have the best open rates?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-006-CM-001
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [campaigns, email_marketing, certified]
+    power_bi_datasets:
+      - Campaign Analytics
