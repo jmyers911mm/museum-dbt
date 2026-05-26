@@ -1,0 +1,75 @@
+verified_queries:
+  - name: retention_by_donor_tier
+    description: >
+      Donor retention rate by tier over months since acquisition.
+      Core metric for development team stewardship planning.
+    file: retention_by_donor_tier.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    question: "What is the retention rate by donor tier over time?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-007-DR-001
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [donor_retention, stewardship, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: retention_by_membership
+    description: >
+      Retention rate by membership type showing which programs retain best.
+      Informs membership program investment decisions.
+    file: retention_by_membership.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    question: "What is retention by membership type?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-007-DR-002
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [donor_retention, membership, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: survival_curve_by_membership
+    description: >
+      Survival curve showing cumulative retention over time by membership type.
+      Visualizes long-term donor loyalty patterns.
+    file: survival_curve_by_membership.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    question: "Show the donor survival curve by membership type"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-007-DR-003
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [donor_retention, survival_analysis, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: at_risk_cohorts
+    description: >
+      Identifies cohorts currently at risk or critical health status.
+      Triggers proactive outreach campaigns.
+    file: at_risk_cohorts.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    question: "Which cohorts are at risk?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-007-DR-004
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [donor_retention, churn_risk, action_required, certified]
+    power_bi_datasets:
+      - Membership & Donors
+
+  - name: churn_by_acquisition_method
+    description: >
+      Churn rate by how donors were originally acquired.
+      Informs acquisition channel ROI and quality assessment.
+    file: churn_by_acquisition_method.sql
+    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    question: "Which acquisition methods have the highest churn?"
+    stakeholder_owner: Jeremy Myers
+    adm_reference: ADR-007-DR-005
+    approved_by: jeremy_myers
+    approved_date: "2026-05-21"
+    tags: [donor_retention, acquisition, churn, certified]
+    power_bi_datasets:
+      - Membership & Donors

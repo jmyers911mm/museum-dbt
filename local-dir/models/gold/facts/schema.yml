@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: fct_ticket_sales
+    description: Ticket-level sales fact with scan outcomes, identity-resolved customers, and all dimension FKs
+    meta:
+      owner: Data Engineering
+      grain: one row per ticket barcode
+    columns:
+      - name: ticket_number
+        description: Unique ticket barcode - primary key
+        tests:
+          - unique
+          - not_null
+      - name: transaction_id
+        description: Transaction ID (may have multiple tickets)
+        tests:
+          - not_null
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: ticket_type
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_ticket_type')
+              field: ticket_type_id
+      - name: payment_method_id
+        tests:
+          - relationships:
+              to: ref('dim_payment_method')
+              field: payment_method_id
+              severity: warn
+      - name: customer_id
+        description: Identity-resolved customer ID (NULL for anonymous)
+        tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+              severity: warn
+      - name: entry_gate
+        tests:
+          - relationships:
+              to: ref('dim_gate')
+              field: gate_id
+              severity: warn
+      - name: utilization_status
+        tests:
+          - accepted_values:
+              values: ['Used', 'Unused', 'Rejected']
+      - name: total_amount
+        tests:
+          - not_null
+
+  - name: fct_retail_line_items
+    description: Line-item retail fact with identity-resolved customers and product/payment FKs
+    meta:
+      owner: Data Engineering
+      grain: one row per retail line item
+    columns:
+      - name: transaction_id
+        description: Retail transaction ID
+        tests:
+          - not_null
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_product')
+              field: product_id
+      - name: payment_method_id
+        tests:
+          - relationships:
+              to: ref('dim_payment_method')
+              field: payment_method_id
+              severity: warn
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+              severity: warn
+      - name: quantity
+        tests:
+          - not_null
+      - name: total_amount
+        tests:
+          - not_null
+
+  - name: fct_ticket_utilization
+    description: "DEPRECATED: Superseded by fct_ticket_sales (ticket-level grain with customer_id, payment_method_id)"
+    config:
+      deprecation_date: "2026-07-01"
+    meta:
+      deprecation_date: "2026-07-01"
+      superseded_by: fct_ticket_sales
+
+  - name: fct_retail_performance
+    description: "DEPRECATED: Superseded by fct_retail_line_items (line-item grain with customer, product, payment FKs)"
+    config:
+      deprecation_date: "2026-07-01"
+    meta:
+      deprecation_date: "2026-07-01"
+      superseded_by: fct_retail_line_items
