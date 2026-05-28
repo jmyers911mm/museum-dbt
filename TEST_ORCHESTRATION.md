@@ -1,4 +1,4 @@
-# NS11MM Data Platform — Test Orchestration & Alert Routing
+# Test Orchestration & Alert Routing
 
 > **Source of truth:** `jmyers911mm/museum-dbt`  
 > **Last updated:** May 2026  ·  Jeremy Myers, VP of AI & Analytics  
