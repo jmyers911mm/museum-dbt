@@ -18,23 +18,40 @@ main (production)
 
 ### Workflow
 
-```bash
-# 1. Create a feature branch from main
-git checkout main && git pull
-git checkout -b feature/your-change-description
+```powershell
+# 1. Navigate to your local repo
+cd C:\Users\jmyers\museum-dbt
 
-# 2. Work in your personal workspace (writes to your personal dev database)
-dbt build --select your_model+
+# 2. Setup C:\Users\jmyers\.snowflake\config.toml (see Snowflake CLI Setup below)
+#    Set password as environment variable (never hardcode in scripts):
+$env:SNOWFLAKE_PASSWORD = "<your_password>"
+snow connection test    # approve DUO notification
+#    snow connection test --mfa-passcode <6_digit_code>
 
-# 3. Run full test suite before PR
-dbt build
+# 3. Copy workspace files to a regular stage (run in Snowsight worksheet)
+COPY FILES INTO @MUSEUM_DW_DEV.PUBLIC.WORKSPACE_EXPORT
+FROM 'snow://workspace/MUSEUM_DW_DEV.PUBLIC."museum-dbt"/versions/live/';
 
-# 4. Push and create PR
-git push -u origin feature/your-change-description
-# Open PR → get review → merge to main
+# 4. Download workspace files to local
+snow stage copy "@MUSEUM_DW_DEV.PUBLIC.WORKSPACE_EXPORT" "./" --recursive --connection museum
 
-# 5. Deploy to prod (run by JMYERS or CI)
-# See Deployment section below
+# 5. Set up git remote (first time only)
+#    git clone https://github.com/jmyers911mm/museum-dbt.git museum-dbt
+git remote set-url origin https://github.com/jmyers911mm/museum-dbt.git
+git pull origin main
+
+# 6. Create a feature branch
+git checkout -b feature/<your_branch_name>
+
+# 7. Stage and commit changes
+git add .
+git commit -m "feat: <describe your changes>"
+
+# 8. Push to remote
+git push -u origin feature/<your_branch_name>
+
+# 9. Create the PR (GitHub CLI — first time: winget install --id GitHub.cli && gh auth login)
+gh pr create --title "<PR title>" --body "<PR description>" --base main --head feature/<your_branch_name>
 ```
 
 ### Commit Messages

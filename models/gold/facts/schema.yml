@@ -260,3 +260,45 @@ models:
       - name: channel_grouping
         tests:
           - not_null
+
+  - name: fct_marketing_sales_daily
+    description: Daily marketing channel performance joined with ticket and retail sales for marketing-to-revenue analysis
+    meta:
+      owner: Marketing Team
+      grain: one row per date-channel combination
+    columns:
+      - name: report_date
+        description: Report date
+        tests:
+          - not_null
+      - name: channel
+        description: Marketing channel name
+        tests:
+          - not_null
+      - name: total_sales_revenue
+        description: Combined ticket and retail revenue for the day
+        tests:
+          - not_null
+      - name: spend
+        description: Marketing spend for the channel on that day
+        tests:
+          - not_null
+
+  - name: fct_campaign_attribution
+    description: Channel-attributed ticket and retail revenue using session-to-customer matching
+    meta:
+      owner: Marketing Team
+      grain: one row per date-channel-source-medium-segment-membership combination
+    columns:
+      - name: report_date
+        description: Date of attributed transactions
+        tests:
+          - not_null
+      - name: channel_grouping
+        description: Marketing channel grouping from GA sessions
+        tests:
+          - not_null
+      - name: total_attributed_revenue
+        description: Combined attributed ticket and retail revenue
+        tests:
+          - not_null

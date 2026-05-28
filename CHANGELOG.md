@@ -2,6 +2,35 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.7.0] - 2026-05-27
+
+### Marketing-to-Sales Attribution Pipeline
+
+**New Gold Fact Models (2)**
+- `fct_marketing_sales_daily` — Daily marketing channel metrics (impressions, clicks, spend, conversions) joined with same-day ticket and retail revenue. Grain: one row per date × channel.
+- `fct_campaign_attribution` — Session-attributed ticket and retail revenue via `bridge_session_customer`. Links marketing channels to actual purchase transactions. Grain: one row per date × channel × source × medium × segment × membership.
+
+**New Semantic View (1)**
+- `MUSEUM_DW_PROD.GOLD.SV_MARKETING_SALES` — Connects marketing performance to ticket/retail sales. 2 entities (marketing_sales, campaign_attribution), 14 metrics (spend, impressions, ticket revenue, retail revenue, attributed revenue, ROAS, CTR), 12 dimensions (date, channel, customer segment, membership type).
+
+**Schema Updates**
+- `models/gold/facts/schema.yml` — Added entries for `fct_marketing_sales_daily` and `fct_campaign_attribution` with not_null tests
+
+**Documentation (9 README files)**
+- `models/staging/README.md` — Source systems, staging conventions
+- `models/silver/README.md` — Cleaning/validation responsibilities, model inventory
+- `models/gold/README.md` — Full dimension/fact/report inventory with grains
+- `models/ml_features/README.md` — ML use cases and feature tables
+- `tests/business_rules/README.md` — Domain invariant test inventory
+- `tests/reconciliation/README.md` — Layer-to-layer reconciliation tests
+- `tests/referential_integrity/README.md` — FK and seed consistency tests
+- `macros/generic_tests/README.md` — Reusable test macro descriptions
+- `macros/operations/README.md` — Utility macro descriptions and usage
+
+**Model count: 52 → 54 | Test count: 379 → 386**
+
+---
+
 ## [2.6.0] - 2026-05-26
 
 ### Digital Marketing Integration
@@ -51,7 +80,7 @@ All notable changes to the museum-dbt project will be documented in this file.
 - `ml_campaign_response_features` — Added email-driven web sessions, paid search/social session counts
 
 **New Semantic View (1)**
-- `MARKETING_PERFORMANCE_SV` — Expanded to 6 entities (ad_performance, website_traffic, email_campaigns, channel_summary, channels, dates), 21 metrics, 17 dimensions. Added email campaigns, reach/frequency, cross-channel summary.
+- `SV_MARKETING_PERFORMANCE` — Expanded to 6 entities (ad_performance, website_traffic, email_campaigns, channel_summary, channels, dates), 21 metrics, 17 dimensions. Added email campaigns, reach/frequency, cross-channel summary.
 
 **New Verified Queries (5)**
 - `roas_by_platform` — ROAS by advertising platform this month

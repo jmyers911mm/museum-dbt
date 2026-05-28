@@ -87,7 +87,7 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 │                      ┌──────────────────────────────────────────┐ │
 │                      │ SV_MUSEUM_OPERATIONS    (13 entities)    │ │
 │                      │ SV_DONOR_RETENTION      (6 entities)     │ │
-│                      │ MARKETING_PERFORMANCE_SV (3 entities)    │ │
+│                      │ SV_MARKETING_PERFORMANCE (3 entities)    │ │
 │                      └──────────────────────────────────────────┘ │
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
@@ -756,7 +756,7 @@ Donor lifecycle analytics and ticket capacity planning.
 - **16 metrics** covering retention rates, survival curves, capacity utilization, demand benchmarks
 - **4 verified queries**
 
-### `MUSEUM_DW_PROD.GOLD.MARKETING_PERFORMANCE_SV`
+### `MUSEUM_DW_PROD.GOLD.SV_MARKETING_PERFORMANCE`
 
 Digital marketing performance across paid advertising, email campaigns, and website analytics.
 
