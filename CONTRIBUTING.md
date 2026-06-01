@@ -24,6 +24,7 @@ cd C:\Users\jmyers\museum-dbt
 
 # 2. Setup C:\Users\jmyers\.snowflake\config.toml (see Snowflake CLI Setup below)
 #    Set password as environment variable (never hardcode in scripts):
+$env:SNOWFLAKE_USERNAME = "<your_username>"
 $env:SNOWFLAKE_PASSWORD = "<your_password>"
 snow connection test    # approve DUO notification
 #    snow connection test --mfa-passcode <6_digit_code>
@@ -52,6 +53,14 @@ git push -u origin feature/<your_branch_name>
 
 # 9. Create the PR (GitHub CLI — first time: winget install --id GitHub.cli && gh auth login)
 gh pr create --title "<PR title>" --body "<PR description>" --base main --head feature/<your_branch_name>
+
+# 10 Update local files and Snowflake
+git pull origin main      # get the latest code from GitHub
+py -3.11 -m venv .venv    # 1. Create the venv with 3.11
+& .venv\Scripts\Activate.ps1    # activate virtual environment
+pip install dbt-core dbt-snowflake  # install dbt for snowflake
+
+dbt run                   # apply it to Snowflake
 ```
 
 ### Commit Messages
