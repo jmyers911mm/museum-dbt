@@ -1,7 +1,7 @@
 # Data Platform Architecture
 
 > **Source of truth:** `jmyers911mm/museum-dbt` — built from actual repo structure  
-> **Last updated:** May 2026  ·  Jeremy Myers, VP of AI & Analytics  
+> **Last updated:** May 2026  ·  Jeremy Myers  
 > **Legend:** `┌─┐` standard layer  `╔═╗` test gate
 
 ```
