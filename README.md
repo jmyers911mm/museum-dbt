@@ -1,8 +1,28 @@
 # museum-dbt
 
+> 📚 **New here?** Start with the [Documentation Map](docs/README.md).
+
+> Business user? Go straight to [Start Here](docs/business/README.md).
+
 A production dbt project for the Museum Data Warehouse on Snowflake. Transforms raw bronze-layer data into analytics-ready silver, gold, and ML feature tables powering operations dashboards, member engagement, retail performance, and ticket demand forecasting.
 
-**Current state:** 69 models | 10 sources | 372+ tests | 36 analyses | 2 snapshots | 8 seeds | 15 exposures | 6 groups | 3 semantic views | 1 Cortex agent | 4 macros
+**Current state:** 71 models | 10 sources | 386+ tests | 36 analyses | 2 snapshots | 8 seeds | 15 exposures | 6 groups | 4 semantic views | 1 Cortex agent | 6 macros
+
+---
+
+## Documentation Guide
+
+| Document | Purpose | Read when... |
+|----------|---------|--------------|
+| **[README.md](README.md)** | Full technical reference: every model, test, role, semantic view, and deployment detail | You need authoritative detail on a specific model, role, or test |
+| **[PROJECT_MAP.md](PROJECT_MAP.md)** | Team orientation guide: mental model, file placement, cross-references | You're new to the repo or need to know where something goes |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Development workflow: branching, PR checklist, VQR workflow, workspace isolation | You're about to write code and open a PR |
+| **[ARCHITECTURE_FLOW.md](ARCHITECTURE_FLOW.md)** | End-to-end data flow diagram (Bronze → Silver → Gold → Consumers) | You want the big-picture "how does data get here" story |
+| **[SOURCE_INTEGRATION.md](SOURCE_INTEGRATION.md)** | Per-source extraction plans: APIs, auth models, ingestion standards | You're onboarding a new source or debugging ingestion |
+| **[TEST_ORCHESTRATION.md](TEST_ORCHESTRATION.md)** | Test scheduling, source clustering, freshness SLAs, alert routing | You're touching test severity, scheduling, or alerting |
+| **[USAGE_AUDIT.md](USAGE_AUDIT.md)** | Cost management: credit auditing, warehouse spend, Cortex AI costs, resource monitors, budgets | You need to audit usage, track spend, or set up cost controls |
+| **[SNOWFLAKE_SETTINGS.md](SNOWFLAKE_SETTINGS.md)** | Account/user settings: roles, warehouses, integrations, MFA status | You need to look up account configuration |
+| **[CHANGELOG.md](CHANGELOG.md)** | Release history with detailed per-version changes | You need history or are cutting a release note |
 
 ---
 
@@ -14,7 +34,7 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 | **Testing** | Source, schema, data quality, business rules, reconciliation, referential integrity, seed validation | 372+ tests |
 | **Governance** | Groups, exposures, deprecation markers, PII classification, CODEOWNERS, ownership metadata | 6 groups / 15 exposures |
 | **CI/CD** | Slim CI (`state:modified+`), docs on merge, pre-deploy validation, full path triggers | ✅ |
-| **Semantic Layer** | 3 semantic views, 30 VQRs, 60+ synonyms, sample values, AI instructions | 20 + 10 VQRs |
+| **Semantic Layer** | 4 semantic views, 35 VQRs, 60+ synonyms, sample values, AI instructions | 20 + 10 + 5 VQRs |
 | **AI & Observability** | Cortex Agent, unredacted event logging, daily gap detection, email + Teams alerts | ✅ |
 | **Operations** | Task DAG (5 tasks), hourly freshness, weekly log purge, pattern analysis | 8 tasks |
 | **Reference Data** | Version-controlled seeds for ticket types, payment methods, LTV tiers, segments, marketing channels, marketing data | 8 seeds |
@@ -34,10 +54,10 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
   - [Staging](#staging-9-models)
   - [Silver](#silver-9-models)
   - [Gold Dimensions](#gold-dimensions-9-models)
-  - [Gold Facts](#gold-facts-21-models)
+  - [Gold Facts](#gold-facts-22-models)
   - [Gold Reports](#gold-reports-8-models)
   - [ML Features](#ml-features-14-models)
-- [Semantic Views](#semantic-views)
+- [Semantic Views](#semantic-views-4)
 - [Cortex Agent](#cortex-agent)
 - [Verified Query Framework](#verified-query-framework)
 - [Testing Strategy](#testing-strategy)
@@ -45,7 +65,7 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
   - [Data Quality Tests](#data-quality-tests)
   - [Business Rule Tests](#business-rule-tests-4)
   - [Reconciliation Tests](#reconciliation-tests-6)
-  - [Referential Integrity Tests](#referential-integrity-tests-8)
+  - [Referential Integrity Tests](#referential-integrity-tests-12)
 - [Macros](#macros)
 - [Snapshots](#snapshots)
 - [Incremental Strategy](#incremental-strategy)
@@ -236,13 +256,21 @@ RPT_CUSTOMER_LTV.CUSTOMER_ID     ← Unified LTV across both channels
 ```
 museum-dbt/
 ├── dbt_project.yml            # Project configuration, materializations, hooks
+├── profiles.yml               # Connection profiles (dev/prod targets)
 ├── CHANGELOG.md               # Release history
-├── CONTRIBUTING.md            # Development workflow & conventions (includes profiles.yml setup)
+├── CONTRIBUTING.md            # Development workflow & conventions
+├── PROJECT_MAP.md             # Team orientation guide — start here
+├── ARCHITECTURE_FLOW.md       # End-to-end platform architecture diagram
+├── SOURCE_INTEGRATION.md      # Per-source extraction plans & API details
+├── TEST_ORCHESTRATION.md      # Test scheduling, SLAs, and alert routing
+├── SNOWFLAKE_SETTINGS.md      # Account/user settings reference
 ├── CODEOWNERS                 # PR approval routing
 ├── .github/
 │   └── workflows/
 │       └── dbt-ci.yml         # Slim CI pipeline
 ├── models/
+│   ├── groups.yml             # Layer-based ownership groups (6 groups)
+│   ├── exposures.yml          # Dashboard, agent, and ML model exposures (15)
 │   ├── staging/               # Views over bronze sources (9 models)
 │   │   ├── sources.yml        # Source definitions + freshness + tests
 │   │   └── stg_*.sql
@@ -250,17 +278,18 @@ museum-dbt/
 │   │   ├── schema.yml         # Column tests, data quality generics
 │   │   └── silver_*.sql
 │   ├── gold/
-│   │   ├── dimensions/        # Dimension tables (8 models)
+│   │   ├── dimensions/        # Dimension tables (9 models)
 │   │   │   ├── schema.yml     # Contract enforcement, accepted_values
 │   │   │   └── dim_*.sql
-│   │   ├── facts/             # Fact tables (14 models)
+│   │   ├── facts/             # Fact tables (22 models incl. bridge)
 │   │   │   └── fct_*.sql
-│   │   └── reports/           # Pre-joined dashboard views (7 models)
+│   │   └── reports/           # Pre-joined dashboard views (8 models)
 │   │       └── rpt_*.sql
-│   └── ml_features/           # ML feature tables (11 models)
+│   └── ml_features/           # ML feature tables (14 models)
 │       └── ml_*.sql
 ├── analyses/
-│   └── verified_queries/      # 30 certified VQRs across 8 business domains
+│   ├── create_marketing_semantic_view.sql
+│   └── verified_queries/      # 35 certified VQRs across 9 business domains
 │       ├── README.md
 │       ├── revenue_operations/ # 7 VQRs
 │       ├── ticket_sales/       # 5 VQRs
@@ -269,9 +298,12 @@ museum-dbt/
 │       ├── membership/         # 3 VQRs
 │       ├── campaigns/          # 1 VQR
 │       ├── donor_retention/    # 5 VQRs
-│       └── capacity_planning/  # 5 VQRs
+│       ├── capacity_planning/  # 5 VQRs
+│       └── digital_marketing/  # 5 VQRs
 ├── macros/
-│   ├── generic_tests/         # Custom test macros
+│   ├── generic_tests/         # Custom test macros (3 files, 10 tests)
+│   │   ├── data_quality_tests.sql
+│   │   ├── generate_hashdiff.sql
 │   │   └── test_hashdiff_integrity.sql
 │   └── operations/            # Run-operation macros
 │       ├── generate_schema_name.sql
@@ -280,14 +312,17 @@ museum-dbt/
 ├── tests/
 │   ├── business_rules/        # Rate bounds, no-negative checks (4 tests)
 │   ├── reconciliation/        # Cross-layer count/revenue matching (6 tests)
-│   └── referential_integrity/ # FK existence checks (8 tests)
+│   └── referential_integrity/ # FK existence checks (12 tests)
+├── seeds/                     # Reference data (8 CSVs)
 ├── snapshots/
-│   └── snap_sf_crm.sql        # SCD Type 2 for CRM contacts
-└── terraform/                 # Snowflake infrastructure (warehouses, roles, etc.)
-    ├── main.tf
-    ├── modules/
-    ├── environments/
-    └── pipelines/
+│   ├── snap_sf_crm.sql        # SCD Type 2 for CRM contacts (hashdiff-based)
+│   └── snap_dim_customer.sql  # SCD Type 2 for identity-resolved customers
+└── terraform/                 # Infrastructure-as-Code
+    ├── main.tf, variables.tf, outputs.tf, providers.tf
+    ├── modules/               # snowflake-warehouse, key-vault, monitor-alerts, static-web-app
+    ├── environments/          # dev, staging, prod tfvars
+    ├── pipelines/             # deploy-dev, deploy-staging, deploy-prod
+    └── notifications/         # Teams webhook setup
 ```
 
 ---
@@ -378,7 +413,7 @@ All sources have:
 | `dim_ticket_type` | 1 row per ticket type | Visitor category, pricing tier, is_free_admission, is_special_exhibition |
 | `dim_marketing_channel` | 1 row per channel | Paid/owned/earned classification, cost model, channel group |
 
-### Gold Facts (21 models)
+### Gold Facts (22 models)
 
 | Model | Grain | Key Metrics |
 |-------|-------|-------------|
@@ -401,8 +436,9 @@ All sources have:
 | `fct_ad_campaign_daily` | 1 row per campaign+platform+date | Campaign-level daily summary: spend, conversions, ROAS, active ads/ad groups |
 | `fct_marketing_channel_summary` | 1 row per date+channel | Unified cross-channel: impressions, clicks, spend, conversions, CPA, ROAS |
 | `fct_website_funnel` | 1 row per date+channel+device | Page progression funnel, drop-off rates, conversion rates |
+| `fct_marketing_sales_daily` | 1 row per date+channel | Marketing spend joined with same-day ticket + retail revenue, revenue-to-spend ratio |
+| `fct_campaign_attribution` | 1 row per date+channel+source+medium+segment+membership | Session-attributed ticket and retail revenue via bridge_session_customer |
 | `bridge_session_customer` | 1 row per session+customer match | Links converting GA sessions to identity-resolved customers |
-| `fct_ticket_utilization` | 1 row per ticket (deprecated) | Superseded by fct_ticket_sales |
 
 ### Gold Reports (8 models)
 
@@ -478,7 +514,7 @@ Applied via `schema.yml` files at each layer:
 | `assert_ticket_revenue_reconciles` | Silver ticket total ≈ Gold daily ops tickets (±$1) |
 | `assert_visitor_count_reconciles` | Silver valid scans = Gold total_visitors (exact) |
 
-### Referential Integrity Tests (8)
+### Referential Integrity Tests (12)
 
 | Test | Validates |
 |------|-----------|
@@ -487,30 +523,37 @@ Applied via `schema.yml` files at each layer:
 | `assert_member360_emails_exist_in_crm` | All gold emails exist in silver CRM |
 | `assert_member360_no_orphan_contacts` | All gold contacts exist in silver CRM |
 | `assert_payment_methods_exist_in_dim` | All ticket payment methods are in dim |
+| `assert_payment_methods_match_seed` | Payment method IDs exist in ref_payment_methods seed |
 | `assert_products_exist_in_dim` | All retail SKUs are in dim_product |
 | `assert_scan_gates_exist_in_dim` | All scan gate_ids are in dim_gate |
 | `assert_ticket_types_exist_in_dim` | All ticket types are in dim_ticket_type |
+| `assert_ticket_types_match_seed` | Ticket types exist in ref_ticket_types seed |
+| `assert_customer_segments_match_seed` | Customer segments exist in ref_customer_segments seed |
+| `assert_ltv_tiers_match_seed` | LTV tiers exist in ref_ltv_tiers seed |
 
 ---
 
 ## Macros
 
-### `generate_schema_name`
-Custom schema routing that uses the schema defined in model config rather than appending to the target schema.
+### Generic Tests (`macros/generic_tests/`)
 
-### `test_hashdiff_integrity`
-Generic test that validates hashdiff columns by checking for:
-1. Duplicate primary keys with different hashdiffs (true changes — expected)
-2. Different primary keys with identical hashdiffs (hash collisions — flagged)
+| Macro | Purpose |
+|-------|--------|
+| `data_quality_tests.sql` | 8 reusable tests: z_score_outlier, positive_value, value_between, null_rate_threshold, late_arriving_data, daily_volume_bounds, cardinality_change, distribution_shift |
+| `generate_hashdiff.sql` | Generates MD5 hashdiff column from a list of columns with null-safe concatenation |
+| `test_hashdiff_integrity.sql` | Validates hashdiff columns for collisions and null hashes |
 
-### `create_ticket_demand_forecast`
-Run-operation macro that creates a Snowflake ML FORECAST model:
-- Uses `fct_ticket_demand_benchmarks` as training data
-- Multi-series forecasting by day-of-week + entry window + ticket type
-- 90-day forecast horizon
+### Operations (`macros/operations/`)
+
+| Macro | Purpose |
+|-------|--------|
+| `generate_schema_name.sql` | Custom schema routing using model config rather than appending to target schema |
+| `create_ticket_demand_forecast.sql` | Creates Snowflake ML FORECAST model for 90-day ticket demand prediction |
+| `sync_verified_queries.sql` | Lists and validates all verified queries for semantic view integration |
 
 ```bash
 dbt run-operation create_ticket_demand_forecast
+dbt run-operation sync_verified_queries
 ```
 
 ---
@@ -522,6 +565,12 @@ dbt run-operation create_ticket_demand_forecast
 - **Unique key:** `contact_id`
 - **Target schema:** SILVER
 - **Purpose:** Track SCD Type 2 changes to CRM contacts (membership status changes, donation updates, etc.)
+
+### `snap_dim_customer`
+- **Strategy:** Check (on `customer_segment`, `membership_type`, `membership_status`, `primary_email`, `primary_phone`, `email_count`, `phone_count`)
+- **Unique key:** `customer_id`
+- **Target schema:** SILVER
+- **Purpose:** Track SCD Type 2 changes to identity-resolved customer dimension (segment changes, membership transitions)
 
 ---
 
@@ -733,9 +782,9 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
-## Semantic Views
+## Semantic Views (4)
 
-Three semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
+Four semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
 
 ### `MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS`
 
@@ -766,6 +815,15 @@ Digital marketing performance across paid advertising, email campaigns, and webs
 - **5 verified queries** (ROAS by platform, top campaigns, weekend vs weekday CTR, cross-channel comparison, website funnel)
 - **AI instructions:** Rounds to 2 decimal places, splits platforms, uses fiscal year by default
 - **DDL location:** `analyses/create_marketing_semantic_view.sql`
+
+### `MUSEUM_DW_PROD.GOLD.SV_MARKETING_SALES`
+
+Marketing-to-sales attribution connecting channel spend to actual ticket and retail revenue.
+
+- **2 entities:** marketing_sales (fct_marketing_sales_daily), campaign_attribution (fct_campaign_attribution)
+- **14 metrics** covering spend, impressions, ticket revenue, retail revenue, attributed revenue, ROAS, CTR
+- **12 dimensions:** date, channel, customer segment, membership type, source, medium, fiscal year
+- **AI instructions:** Combines marketing spend with same-day transaction-level attributed revenue
 
 ### Access
 
@@ -800,7 +858,7 @@ Certified queries live in `analyses/verified_queries/` organized by business dom
 - `_verified_queries.yml` — governance metadata (owner, ADR ref, approval, tags, PBI datasets)
 - `*.sql` — the verified query SQL using `SEMANTIC_VIEW()` syntax
 
-**30 certified VQRs** across 8 domains, synced to semantic views.
+**35 certified VQRs** across 9 domains, synced to semantic views.
 
 **Governance fields:**
 ```yaml
