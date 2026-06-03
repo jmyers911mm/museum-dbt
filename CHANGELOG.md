@@ -2,6 +2,103 @@
 
 All notable changes to the museum-dbt project will be documented in this file.
 
+## [2.9.0] - 2026-06-03
+
+### Gold Models (8 new)
+- `fct_campaign_performance` — email campaign metrics joined with dimension context and fiscal calendar
+- `fct_campaign_attribution` — multi-touch attribution linking web conversions to resolved customers
+- `fct_marketing_channel_summary` — cross-channel spend/conversion rollup (paid search, display, social, organic)
+- `fct_website_traffic` — daily web analytics by channel, source, device, and page category
+- `fct_website_funnel` — conversion funnel stages from landing → tickets → membership → purchase
+- `fct_ticket_demand_benchmarks` — rolling 90-day demand benchmarks by ticket type, day-of-week, and time slot
+- `bridge_session_customer` — bridge table linking Google Analytics sessions to resolved customers via email match
+- `rpt_campaign_performance` — pre-joined campaign report with fiscal context and audience-size tiers
+
+### ML Feature Models (3 new)
+- `ml_campaign_response_features` — campaign response scoring features
+- `ml_email_send_time_features` — optimal send-time prediction features
+- `ml_retail_cross_sell_features` — product affinity and cross-sell recommendation features
+
+### Macros
+- `create_ticket_demand_forecast` — run-operation macro creating a Snowflake ML FORECAST model for 90-day ticket demand prediction (multi-series by ticket type)
+- `sync_verified_queries` — run-operation macro to sync certified VQR SQL files into the semantic view
+
+### Snapshots
+- `snap_dim_customer` — SCD Type 2 snapshot tracking changes to customer segment, membership status, and contact details
+
+### Verified Queries (36 queries across 9 domains)
+- `campaigns/` — campaign performance by type
+- `capacity_planning/` — availability, half-life, peak demand, sold-out slots, weekend utilization
+- `digital_marketing/` — cross-channel comparison, ROAS, top campaigns, website funnel, weekend CTR
+- `donor_retention/` — at-risk cohorts, churn by acquisition, retention by tier/membership, survival curves
+- `membership/` — customers by type, LTV by segment/tier
+- `retail/` — retail by category, top-selling products
+- `revenue_operations/` — daily/monthly revenue, fiscal year summary, revenue by day-of-week/payment method
+- `ticket_sales/` — discount analysis, purchase-to-entry time, AOV trend, revenue by type, gate utilization
+- `visitor_experience/` — visitors by gate, visitors by hour
+
+### Governance & Documentation
+- `docs/architecture/SQL_STYLE_GUIDE.md` — naming, layering, formatting, and dbt conventions
+- `docs/architecture/DATA_CLASSIFICATION.md` — PII handling tiers, access control rules, classification on new models
+- `docs/architecture/USAGE_AUDIT.md` — usage monitoring and audit procedures
+- `docs/business/METRIC_GLOSSARY.md` — plain-English definitions for all certified metrics across 6 domains
+- `docs/ONBOARDING.md` — linear day-1 checklist for new data team members
+- `docs/README.md` — documentation map with role-based entry points for all audiences
+- `docs/adr/0005-metric-definition-gate.md` — ADR requiring metric approval before Gold implementation
+- `docs/adr/0006-change-management-tiers.md` — ADR establishing tiered change management (Tier 1/Tier 2/Emergency)
+
+### Operational
+- `analyses/create_marketing_semantic_view.sql` — DDL to create the Cortex Analyst semantic view for digital marketing
+- `models/exposures.yml` — dbt exposures defining downstream consumers (Power BI, Cortex Agent, ML pipelines)
+
+### Changed
+- Model count: 56 → 71 (15 new models)
+- `CODEOWNERS` expanded with ownership paths for verified queries and documentation
+
+---
+
+## [2.8.0] - 2026-06-01
+
+### Infrastructure-as-Code & Platform Documentation
+
+**Terraform IaC** (`terraform/`)
+- `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf` — Root module for platform infrastructure
+- `modules/snowflake-warehouse/main.tf` — Warehouse provisioning module
+- `modules/key-vault/main.tf` — Azure Key Vault for secret management
+- `modules/monitor-alerts/main.tf` — Azure Monitor alert rules
+- `modules/static-web-app/main.tf` — Static web app hosting module
+- `environments/dev.tfvars.json`, `staging.tfvars.json`, `prod.tfvars.json` — Per-environment variable files
+- `pipelines/deploy-dev.yml`, `deploy-staging.yml`, `deploy-prod.yml` — CI/CD deployment pipelines
+- `notifications/teams_webhook_setup.sql` — Microsoft Teams webhook notification integration template
+- `terraform/.gitignore`, `terraform/CODEOWNERS`, `terraform/README.md` — Governance files
+
+**Platform Documentation (5 new files)**
+- `PROJECT_MAP.md` — Team orientation guide: mental model, file placement guide, document cross-references
+- `ARCHITECTURE_FLOW.md` — End-to-end platform architecture diagram (Bronze → Silver → Gold → Consumers) with ASCII-art flow
+- `SOURCE_INTEGRATION.md` — Per-source extraction plans (Gateway Ticketing, Salesforce, Google Ads/Analytics, Meta Ads) with auth models and API details
+- `TEST_ORCHESTRATION.md` — Test scheduling, source clustering, freshness SLAs, and alert routing rules
+- `SNOWFLAKE_SETTINGS.md` — Account/user settings reference (roles, warehouses, integrations)
+
+**Workspace Utility**
+- `COPYWORKSPACE.sql` — One-line workspace-to-stage export command for backup/migration
+
+**dbt Groups Restructure**
+- `models/groups.yml` — Replaced domain-based groups (`_model_groups.yml`: daily_operations, member_engagement, donor_retention, campaign_analytics, visitor_forecasting) with layer-based ownership groups (staging, silver, gold_dimensions, gold_facts, gold_reports, ml_features). Each group has explicit owner/email.
+- `dbt_project.yml` — All model folders now reference `+group` assignments; added `+access: public` for Gold and ML layers
+
+**Data Quality Test Expansion**
+- `macros/generic_tests/data_quality_tests.sql` — Added 5 new generic tests:
+  - `null_rate_threshold` — Fails if column null percentage exceeds threshold (default 50%)
+  - `late_arriving_data` — Detects records loaded recently but timestamped beyond max lag (default 72h)
+  - `daily_volume_bounds` — Validates daily row counts stay within min/max bounds
+  - `cardinality_change` — Alerts if distinct value count falls outside expected range
+  - `distribution_shift` — Detects when a specific value's frequency drifts outside acceptable range
+
+**Project Configuration**
+- `dbt_project.yml` — Added `vars: skip_circuit_breaker: false` for conditional circuit-breaker bypass in test macros
+
+---
+
 ## [2.7.0] - 2026-05-27
 
 ### Marketing-to-Sales Attribution Pipeline

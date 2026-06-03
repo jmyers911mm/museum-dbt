@@ -33,14 +33,23 @@ gold/
 | `fct_retail_line_items` | Line item | Retail transactions with product/customer FKs |
 | `fct_daily_operations` | Day | Daily aggregate of visitors, tickets, retail |
 | `fct_monthly_operations` | Month | Monthly operational rollup |
-| `fct_marketing_channel_summary` | Day × channel | Unified channel performance (paid + owned + earned) |
-| `fct_ad_campaign_daily` | Day × campaign × platform | Campaign-level ad metrics |
-| `fct_digital_ad_performance` | Day × campaign × adgroup × platform × placement × device | Granular ad performance |
-| `fct_website_traffic` | Day × channel × source × medium × page × device | Website sessions and conversions |
-| `fct_website_funnel` | Day × channel × device | Conversion funnel with drop-off rates |
-| `fct_marketing_sales_daily` | Day × channel | Marketing spend joined with ticket/retail revenue |
-| `fct_campaign_attribution` | Day × channel × source × medium × segment × membership | Session-attributed revenue |
-| `fct_campaign_performance` | Campaign | Email campaign lifetime metrics |
+| `fct_monthly_retail` | Month × category | Monthly retail rollups with avg daily revenue |
+| `fct_visitor_traffic` | Date × hour × gate | Hourly gate traffic with valid/rejected scans |
+| `fct_retail_performance` | Date × category | Daily retail by category (deprecated 2026-07-01) |
+| `fct_ticket_utilization` | Ticket | Per-ticket scan outcomes (deprecated 2026-07-01) |
+| `fct_ticket_availability` | Capacity slot | Utilization %, demand level, remaining capacity |
+| `fct_ticket_demand_benchmarks` | Benchmark | 90-day rolling stats with ±2σ bounds |
+| `fct_campaign_performance` | Campaign | Email campaign lifetime open/click/bounce rates |
+| `fct_member_360` | Contact | Unified tickets + retail + donations + email engagement |
+| `fct_donor_retention` | Cohort × month × segment | Retention and churn rates by cohort |
+| `fct_donor_cohort_survival` | Cohort × period | Survival analysis with half-life detection |
+| `fct_digital_ad_performance` | Campaign × adgroup × date × platform | Unified Google Ads + Meta Ads metrics |
+| `fct_website_traffic` | Date × channel × source × page × device | GA sessions and conversions |
+| `fct_ad_campaign_daily` | Campaign × platform × date | Campaign-level daily summary |
+| `fct_marketing_channel_summary` | Date × channel | Unified cross-channel performance |
+| `fct_website_funnel` | Date × channel × device | Conversion funnel with drop-off rates |
+| `fct_marketing_sales_daily` | Date × channel | Marketing spend joined with ticket/retail revenue |
+| `fct_campaign_attribution` | Date × channel × source × medium × segment | Session-attributed revenue |
 | `bridge_session_customer` | Session × customer | Links converting GA sessions to customers |
 
 ## Reports
