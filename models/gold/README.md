@@ -61,6 +61,7 @@ gold/
 | `rpt_retail_performance` | Retail report with product, payment, and customer attributes |
 | `rpt_visitor_traffic` | Hourly gate traffic with utilization metrics |
 | `rpt_campaign_performance` | Campaign metrics with type/tier classification |
+| `rpt_revenue_bridge` | Weekly revenue bridge: budget vs actual, YoY, component breakdown |
 | `rpt_digital_marketing` | Combined ad performance and website traffic |
 | `rpt_member_360` | Identity-resolved member profile with LTV |
 | `rpt_customer_ltv` | Unified LTV report with tier classification |

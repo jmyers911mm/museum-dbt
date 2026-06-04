@@ -1,6 +1,6 @@
 # RUNBOOK — Museum Data Platform Operations
 
-Operational procedures for running, monitoring, and recovering the `museum-dbt` platform. This is the on-call reference. The **DQ Incident Log**, **Change Log**, and **Rollback Package** records live in the Platform Hub; this runbook tells you the procedures and where to record them.
+Operational procedures for running, monitoring, and recovering the `ns11mm-dbt` platform. This is the on-call reference. The **DQ Incident Log**, **Change Log**, and **Rollback Package** records live in the Platform Hub; this runbook tells you the procedures and where to record them.
 
 **Audience:** data team and on-call. **Escalation owner:** Jeremy Myers (infra owner).
 
@@ -108,13 +108,13 @@ If a deploy introduced a regression:
 3. **Redeploy** the prior good version:
    ```
    -- Re-create the project from the known-good version, then rebuild
-   CREATE OR REPLACE DBT PROJECT MUSEUM_DW_PROD.SILVER.MUSEUM_DBT
-     FROM 'snow://workspace/USER$.PUBLIC."museum-dbt"/versions/live';
-   EXECUTE DBT PROJECT MUSEUM_DW_PROD.SILVER.MUSEUM_DBT ARGS = 'build';
+   CREATE OR REPLACE DBT PROJECT NS11MM_DW_PROD.SILVER.NS11MM_DBT
+     FROM 'snow://workspace/USER$.PUBLIC."ns11mm-dbt"/versions/live';
+   EXECUTE DBT PROJECT NS11MM_DW_PROD.SILVER.NS11MM_DBT ARGS = 'build';
    ```
 4. **Full-refresh** any incremental models whose shape changed:
    ```
-   EXECUTE DBT PROJECT MUSEUM_DW_PROD.SILVER.MUSEUM_DBT ARGS = 'build --full-refresh --select <model>+';
+   EXECUTE DBT PROJECT NS11MM_DW_PROD.SILVER.NS11MM_DBT ARGS = 'build --full-refresh --select <model>+';
    ```
 5. **Record** a Rollback Package entry in the Hub (what was rolled back, why, verification).
 6. **Post-incident review** within 48 hours for anything that reached prod.
@@ -155,7 +155,7 @@ dbt run-operation sync_verified_queries
 
 # Agent observability (what was asked / generated SQL / results)
 SELECT * FROM TABLE(SNOWFLAKE.LOCAL.GET_AI_OBSERVABILITY_EVENTS(
-  'MUSEUM_DW_PROD','GOLD','MUSEUM_OPERATIONS_AGENT','CORTEX AGENT'));
+  'NS11MM_DW_PROD','GOLD','MUSEUM_OPERATIONS_AGENT','CORTEX AGENT'));
 ```
 
 ---
@@ -175,6 +175,6 @@ SELECT * FROM TABLE(SNOWFLAKE.LOCAL.GET_AI_OBSERVABILITY_EVENTS(
 
 - [CONTRIBUTING](CONTRIBUTING.md) — change gates, deployment, VQR workflow
 - [README](README.md) — architecture, lineage, testing strategy
-- [Data Classification](docs/DATA_CLASSIFICATION.md) — PII handling
+- [Data Classification](docs/architecture/DATA_CLASSIFICATION.md) — PII handling
 - [Documentation Map](docs/README.md) — everything else
 - **Hub:** DQ Incident Log, Change Log, Rollback Package, Access Grant Matrix

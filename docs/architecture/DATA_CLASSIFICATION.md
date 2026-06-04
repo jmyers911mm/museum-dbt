@@ -62,7 +62,7 @@ When you add a model that carries PII or sensitive fields:
 - [ ] Mark the PII columns in the model's `schema.yml` (description and any classification meta your team uses).
 - [ ] Confirm the model's grants don't over-expose identifier columns.
 - [ ] If it introduces a new category of sensitive data, note it in the Hub's Data Classification Record.
-- [ ] If it changes who can see PII, that's likely a governance change — check the change-gate tiers in [CONTRIBUTING](../CONTRIBUTING.md#change-gate-classification).
+- [ ] If it changes who can see PII, that's likely a governance change — check the change-gate tiers in [CONTRIBUTING](../../CONTRIBUTING.md#change-gate-classification).
 
 ---
 
@@ -70,5 +70,5 @@ When you add a model that carries PII or sensitive fields:
 
 - **Data Governance & Integrity Policy** (Hub) — the authoritative policy.
 - **Access Grant Matrix** (Hub) — who can access what.
-- [README → Access Control & Grants](../README.md#access-control--grants) — how grants are applied technically.
-- [Documentation Map](README.md) — everything else.
+- [README → Access Control & Grants](../../README.md#access-control--grants) — how grants are applied technically.
+- [Documentation Map](../README.md) — everything else.

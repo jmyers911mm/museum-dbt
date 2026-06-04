@@ -1,6 +1,6 @@
 # Project Map — Start Here
 
-**A team orientation guide for `museum-dbt`.** This is the "lay of the land" document: how the project is built, what each part does, where everything lives, where dbt resolves its references, and where a new file should go. It is deliberately a *map*, not a reference manual — when you need depth, it points you to the right document.
+**A team orientation guide for `ns11mm-dbt`.** This is the "lay of the land" document: how the project is built, what each part does, where everything lives, where dbt resolves its references, and where a new file should go. It is deliberately a *map*, not a reference manual — when you need depth, it points you to the right document.
 
 > **New to the repo?** Read this top to bottom once (~15 minutes). After that, use it as a lookup: the [Where does my new file go?](#where-does-my-new-file-go) and [Where do I find the answer to…?](#where-do-i-find-the-answer-to) sections are the ones you'll keep coming back to.
 

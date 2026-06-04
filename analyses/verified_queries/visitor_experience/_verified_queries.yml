@@ -4,7 +4,7 @@ verified_queries:
       Hourly visitor traffic pattern across all gates.
       Supports staffing schedules and peak hour identification.
     file: visitors_by_hour.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "What are the busiest hours for visitors?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-003-VE-001
@@ -19,7 +19,7 @@ verified_queries:
       Visitor volume by gate with location and members-only designation.
       Informs gate staffing and wayfinding decisions.
     file: visitors_by_gate.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "How many visitors enter through each gate?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-003-VE-002

@@ -16,7 +16,7 @@ The data platform modernization replaces legacy Pentaho ETL and SSRS reporting. 
 
 ## Decision
 
-We will use **Snowflake** as the platform data warehouse. The Microsoft Fabric POC is rejected. The warehouse is provisioned and governed via Terraform; environments are `MUSEUM_DW_DEV` (per-developer), `MUSEUM_DW_STAGING`, and `MUSEUM_DW_PROD`, each with `BRONZE / SILVER / GOLD / ML_FEATURES` schemas.
+We will use **Snowflake** as the platform data warehouse. The Microsoft Fabric POC is rejected. The warehouse is provisioned and governed via Terraform; environments are `NS11MM_DW_DEV` (per-developer), `NS11MM_DW_STAGING`, and `NS11MM_DW_PROD`, each with `BRONZE / SILVER / GOLD / ML_FEATURES` schemas.
 
 ## Consequences
 

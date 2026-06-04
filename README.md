@@ -1,4 +1,4 @@
-# museum-dbt
+# ns11mm-dbt
 
 > 📚 **New here?** Start with the [Documentation Map](docs/README.md).
 
@@ -6,7 +6,7 @@
 
 A production dbt project for the Museum Data Warehouse on Snowflake. Transforms raw bronze-layer data into analytics-ready silver, gold, and ML feature tables powering operations dashboards, member engagement, retail performance, and ticket demand forecasting.
 
-**Current state:** 71 models | 10 sources | 386+ tests | 36 analyses | 2 snapshots | 8 seeds | 15 exposures | 6 groups | 4 semantic views | 1 Cortex agent | 6 macros
+**Current state:** 72 models | 10 sources | 386+ tests | 36 analyses | 2 snapshots | 8 seeds | 15 exposures | 6 groups | 4 semantic views | 1 Cortex agent | 6 macros
 
 ---
 
@@ -15,13 +15,13 @@ A production dbt project for the Museum Data Warehouse on Snowflake. Transforms 
 | Document | Purpose | Read when... |
 |----------|---------|--------------|
 | **[README.md](README.md)** | Full technical reference: every model, test, role, semantic view, and deployment detail | You need authoritative detail on a specific model, role, or test |
-| **[PROJECT_MAP.md](PROJECT_MAP.md)** | Team orientation guide: mental model, file placement, cross-references | You're new to the repo or need to know where something goes |
+| **[PROJECT_MAP.md](docs/architecture/PROJECT_MAP.md)** | Team orientation guide: mental model, file placement, cross-references | You're new to the repo or need to know where something goes |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | Development workflow: branching, PR checklist, VQR workflow, workspace isolation | You're about to write code and open a PR |
-| **[ARCHITECTURE_FLOW.md](ARCHITECTURE_FLOW.md)** | End-to-end data flow diagram (Bronze → Silver → Gold → Consumers) | You want the big-picture "how does data get here" story |
-| **[SOURCE_INTEGRATION.md](SOURCE_INTEGRATION.md)** | Per-source extraction plans: APIs, auth models, ingestion standards | You're onboarding a new source or debugging ingestion |
-| **[TEST_ORCHESTRATION.md](TEST_ORCHESTRATION.md)** | Test scheduling, source clustering, freshness SLAs, alert routing | You're touching test severity, scheduling, or alerting |
-| **[USAGE_AUDIT.md](USAGE_AUDIT.md)** | Cost management: credit auditing, warehouse spend, Cortex AI costs, resource monitors, budgets | You need to audit usage, track spend, or set up cost controls |
-| **[SNOWFLAKE_SETTINGS.md](SNOWFLAKE_SETTINGS.md)** | Account/user settings: roles, warehouses, integrations, MFA status | You need to look up account configuration |
+| **[ARCHITECTURE_FLOW.md](docs/architecture/ARCHITECTURE_FLOW.md)** | End-to-end data flow diagram (Bronze → Silver → Gold → Consumers) | You want the big-picture "how does data get here" story |
+| **[SOURCE_INTEGRATION.md](docs/architecture/SOURCE_INTEGRATION.md)** | Per-source extraction plans: APIs, auth models, ingestion standards | You're onboarding a new source or debugging ingestion |
+| **[TEST_ORCHESTRATION.md](docs/architecture/TEST_ORCHESTRATION.md)** | Test scheduling, source clustering, freshness SLAs, alert routing | You're touching test severity, scheduling, or alerting |
+| **[USAGE_AUDIT.md](docs/architecture/USAGE_AUDIT.md)** | Cost management: credit auditing, warehouse spend, Cortex AI costs, resource monitors, budgets | You need to audit usage, track spend, or set up cost controls |
+| **[SNOWFLAKE_SETTINGS.md](docs/architecture/SNOWFLAKE_SETTINGS.md)** | Account/user settings: roles, warehouses, integrations, MFA status | You need to look up account configuration |
 | **[CHANGELOG.md](CHANGELOG.md)** | Release history with detailed per-version changes | You need history or are cutting a release note |
 
 ---
@@ -254,7 +254,7 @@ RPT_CUSTOMER_LTV.CUSTOMER_ID     ← Unified LTV across both channels
 ## Project Structure
 
 ```
-museum-dbt/
+ns11mm-dbt/
 ├── dbt_project.yml            # Project configuration, materializations, hooks
 ├── profiles.yml               # Connection profiles (dev/prod targets)
 ├── CHANGELOG.md               # Release history
@@ -283,7 +283,7 @@ museum-dbt/
 │   │   │   └── dim_*.sql
 │   │   ├── facts/             # Fact tables (22 models incl. bridge)
 │   │   │   └── fct_*.sql
-│   │   └── reports/           # Pre-joined dashboard views (8 models)
+│   │   └── reports/           # Pre-joined dashboard views (9 models)
 │   │       └── rpt_*.sql
 │   └── ml_features/           # ML feature tables (14 models)
 │       └── ml_*.sql
@@ -440,7 +440,7 @@ All sources have:
 | `fct_campaign_attribution` | 1 row per date+channel+source+medium+segment+membership | Session-attributed ticket and retail revenue via bridge_session_customer |
 | `bridge_session_customer` | 1 row per session+customer match | Links converting GA sessions to identity-resolved customers |
 
-### Gold Reports (8 models)
+### Gold Reports (9 models)
 
 Pre-joined views optimized for dashboard consumption with full dimension attributes:
 
@@ -448,6 +448,7 @@ Pre-joined views optimized for dashboard consumption with full dimension attribu
 - `rpt_visitor_traffic` — Traffic: hourly gate patterns with dim_gate attributes + ticket utilization per gate
 - `rpt_retail_performance` — Retail: line-item level with dim_product, dim_payment_method, dim_customer joins
 - `rpt_campaign_performance` — Campaign: metrics with dim_campaign type/tier + dim_date fiscal context
+- `rpt_revenue_bridge` — Weekly revenue bridge: budget vs actual, YoY comparison, component breakdown (tickets + retail), WoW change, discount impact
 - `rpt_member_360` — Members: identity-resolved with ticket + retail spend from new fact tables, LTV tier
 - `rpt_customer_ltv` — Unified LTV (tickets + retail + donations) with tier (Platinum/Gold/Silver/Bronze), tenure, avg spend
 - `rpt_ticket_sales` — Full star-schema tickets with role-playing dates, all dim attributes joined
@@ -600,8 +601,8 @@ All incremental models use **merge** strategy:
 | **USERADMIN** | User and role management. Creates and manages users and custom roles. | — |
 | **SYSADMIN** | System administration. Creates and manages databases, warehouses, and other account objects. Parent of all custom roles. | All |
 | **PUBLIC** | Default role granted to every user. Minimal privileges. | — |
-| **DBT_DEV_ROLE** | dbt development. Full read/write access to `MUSEUM_DW_DEV` (all schemas: BRONZE, SILVER, GOLD, ML_FEATURES, PUBLIC). Owns all dbt-created objects in dev. | COMPUTE_WH, DBT_DEV_WH |
-| **DBT_PROD_ROLE** | dbt production builds. Full read/write access to `MUSEUM_DW_PROD` (all schemas). Owns all dbt-created objects in prod. | DBT_PROD_WH |
+| **DBT_DEV_ROLE** | dbt development. Full read/write access to `NS11MM_DW_DEV` (all schemas: BRONZE, SILVER, GOLD, ML_FEATURES, PUBLIC). Owns all dbt-created objects in dev. | COMPUTE_WH, DBT_DEV_WH |
+| **DBT_PROD_ROLE** | dbt production builds. Full read/write access to `NS11MM_DW_PROD` (all schemas). Owns all dbt-created objects in prod. | DBT_PROD_WH |
 | **POWERBI_ROLE** | Read-only reporting for Power BI dashboards. No write access anywhere. | COMPUTE_WH, DBT_PROD_WH, MONITORING_WH |
 | **ML_ROLE** | ML engineering. Read access to Silver/Gold layers; full read/write to `ML_FEATURES` schema. Can create Snowflake ML models (FORECAST, ANOMALY_DETECTION). | COMPUTE_WH, ML_STUDIO_WH, MONITORING_WH |
 
@@ -623,19 +624,19 @@ ACCOUNTADMIN
 
 | Database.Schema | DBT_DEV_ROLE | DBT_PROD_ROLE | POWERBI_ROLE | ML_ROLE |
 |-----------------|:------------:|:-------------:|:------------:|:-------:|
-| **MUSEUM_DW_DEV.BRONZE** | Read/Write | — | — | — |
-| **MUSEUM_DW_DEV.SILVER** | Read/Write | — | — | — |
-| **MUSEUM_DW_DEV.GOLD** | Read/Write | — | Read | Read |
-| **MUSEUM_DW_DEV.ML_FEATURES** | Read/Write | — | — | Read |
-| **MUSEUM_DW_PROD.BRONZE** | — | Read/Write | — | — |
-| **MUSEUM_DW_PROD.SILVER** | — | Read/Write | — | Read |
-| **MUSEUM_DW_PROD.GOLD** | — | Read/Write | Read | Read |
-| **MUSEUM_DW_PROD.ML_FEATURES** | — | Read/Write | — | Read/Write |
+| **NS11MM_DW_DEV.BRONZE** | Read/Write | — | — | — |
+| **NS11MM_DW_DEV.SILVER** | Read/Write | — | — | — |
+| **NS11MM_DW_DEV.GOLD** | Read/Write | — | Read | Read |
+| **NS11MM_DW_DEV.ML_FEATURES** | Read/Write | — | — | Read |
+| **NS11MM_DW_PROD.BRONZE** | — | Read/Write | — | — |
+| **NS11MM_DW_PROD.SILVER** | — | Read/Write | — | Read |
+| **NS11MM_DW_PROD.GOLD** | — | Read/Write | Read | Read |
+| **NS11MM_DW_PROD.ML_FEATURES** | — | Read/Write | — | Read/Write |
 
 ### POWERBI_ROLE Details
 
-- **Read:** All tables in `MUSEUM_DW_PROD.GOLD` (dims, facts, reports, seeds), plus monitoring views (`V_BUILD_HISTORY`, `V_DATA_SOURCE_STATUS`, `V_PIPELINE_HEALTH`, `V_SLA_COMPLIANCE`, `V_SOURCE_FRESHNESS_HISTORY`)
-- **Read:** All tables in `MUSEUM_DW_DEV.GOLD` (for dev dashboard testing)
+- **Read:** All tables in `NS11MM_DW_PROD.GOLD` (dims, facts, reports, seeds), plus monitoring views (`V_BUILD_HISTORY`, `V_DATA_SOURCE_STATUS`, `V_PIPELINE_HEALTH`, `V_SLA_COMPLIANCE`, `V_SOURCE_FRESHNESS_HISTORY`)
+- **Read:** All tables in `NS11MM_DW_DEV.GOLD` (for dev dashboard testing)
 - **Read:** Semantic views `SV_MUSEUM_OPERATIONS`, `SV_DONOR_RETENTION`
 - **Write:** None
 
@@ -668,8 +669,8 @@ Additional:
 | Target | Database | Warehouse | Role | Threads |
 |--------|----------|-----------|------|---------|
 | dev | MUSEUM_DW_DEV | DBT_DEV_WH | DBT_DEV_ROLE | 4 |
-| staging | MUSEUM_DW_STAGING | DBT_PROD_WH | DBT_PROD_ROLE | 8 |
-| prod | MUSEUM_DW_PROD | DBT_PROD_WH | DBT_PROD_ROLE | 8 |
+| staging | NS11MM_DW_STAGING | DBT_PROD_WH | DBT_PROD_ROLE | 8 |
+| prod | NS11MM_DW_PROD | DBT_PROD_WH | DBT_PROD_ROLE | 8 |
 
 ### Session Configuration
 - `STATEMENT_TIMEOUT_IN_SECONDS = 3600` (default)
@@ -763,8 +764,8 @@ Production deployment uses Snowflake's native dbt integration:
 
 ```sql
 -- Deploy project
-CREATE OR REPLACE DBT PROJECT museum_dbt
-  FROM 'snow://workspace/USER$.PUBLIC."museum-dbt"/versions/live/'
+CREATE OR REPLACE DBT PROJECT ns11mm_dbt
+  FROM 'snow://workspace/USER$.PUBLIC."ns11mm-dbt"/versions/live/'
   ...;
 
 -- Execute build
@@ -786,7 +787,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 Four semantic views provide self-service analytics via Cortex Analyst and Power BI Semantic Views connector:
 
-### `MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS`
+### `NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS`
 
 Day-to-day operations, revenue, and customer analytics.
 
@@ -797,7 +798,7 @@ Day-to-day operations, revenue, and customer analytics.
 - **Identity resolution:** customers merged by shared email OR phone
 - **Cross-entity LTV:** tickets + retail share customer_id
 
-### `MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION`
+### `NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION`
 
 Donor lifecycle analytics and ticket capacity planning.
 
@@ -805,7 +806,7 @@ Donor lifecycle analytics and ticket capacity planning.
 - **16 metrics** covering retention rates, survival curves, capacity utilization, demand benchmarks
 - **4 verified queries**
 
-### `MUSEUM_DW_PROD.GOLD.SV_MARKETING_PERFORMANCE`
+### `NS11MM_DW_PROD.GOLD.SV_MARKETING_PERFORMANCE`
 
 Digital marketing performance across paid advertising, email campaigns, and website analytics.
 
@@ -816,7 +817,7 @@ Digital marketing performance across paid advertising, email campaigns, and webs
 - **AI instructions:** Rounds to 2 decimal places, splits platforms, uses fiscal year by default
 - **DDL location:** `analyses/create_marketing_semantic_view.sql`
 
-### `MUSEUM_DW_PROD.GOLD.SV_MARKETING_SALES`
+### `NS11MM_DW_PROD.GOLD.SV_MARKETING_SALES`
 
 Marketing-to-sales attribution connecting channel spend to actual ticket and retail revenue.
 
@@ -833,7 +834,7 @@ All views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views conne
 
 ## Cortex Agent
 
-`MUSEUM_DW_PROD.GOLD.MUSEUM_OPERATIONS_AGENT` provides natural language analytics with full observability.
+`NS11MM_DW_PROD.GOLD.MUSEUM_OPERATIONS_AGENT` provides natural language analytics with full observability.
 
 **Tools:**
 - `MUSEUM_OPERATIONS_DATA` → `SV_MUSEUM_OPERATIONS` (operations, revenue, customers)
@@ -842,7 +843,7 @@ All views are accessible to `POWERBI_ROLE` for the Power BI Semantic Views conne
 **Observability:**
 - All questions, generated SQL, and results are logged via `GET_AI_OBSERVABILITY_EVENTS`
 - Unredacted content access granted for full audit trail
-- Query: `SELECT * FROM TABLE(SNOWFLAKE.LOCAL.GET_AI_OBSERVABILITY_EVENTS('MUSEUM_DW_PROD', 'GOLD', 'MUSEUM_OPERATIONS_AGENT', 'CORTEX AGENT'))`
+- Query: `SELECT * FROM TABLE(SNOWFLAKE.LOCAL.GET_AI_OBSERVABILITY_EVENTS('NS11MM_DW_PROD', 'GOLD', 'MUSEUM_OPERATIONS_AGENT', 'CORTEX AGENT'))`
 
 **Automated Gap Detection:**
 - `MONITORING.TASK_AGENT_PATTERN_ANALYSIS` runs daily at 8 AM ET
@@ -889,11 +890,11 @@ All files currently owned by `@jwmyers82`. See CODEOWNERS for per-path routing.
 
 ### Query Tags
 All models emit query tags for Snowflake query history filtering:
-- `dbt_museum_staging`
-- `dbt_museum_silver`
-- `dbt_museum_gold`
-- `dbt_museum_ml_features`
-- `dbt_museum_snapshots`
+- `dbt_ns11mm_staging`
+- `dbt_ns11mm_silver`
+- `dbt_ns11mm_gold`
+- `dbt_ns11mm_ml_features`
+- `dbt_ns11mm_snapshots`
 
 ---
 
@@ -902,7 +903,7 @@ All models emit query tags for Snowflake query history filtering:
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Summary:
 
 1. Create a short-lived feature branch from `main`
-2. Develop in your personal dev workspace (`MUSEUM_DW_DEV`)
+2. Develop in your personal dev workspace (`NS11MM_DW_DEV_<USERNAME>`)
 3. Run `dbt build` to verify
 4. Push and open a PR — CI will run slim builds
 5. Get review, merge to `main`
