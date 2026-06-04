@@ -1,6 +1,6 @@
 # NS11MM Data Platform Architecture
 
-> **Source of truth:** `jmyers911mm/museum-dbt` — built from actual repo structure  
+> **Source of truth:** `jmyers911mm/ns11mm-dbt` — built from actual repo structure  
 > **Last updated:** May 2026  ·  Jeremy Myers, VP of AI & Analytics  
 > **Legend:** `┌─┐` standard layer  `╔═╗` test gate
 
@@ -11,7 +11,7 @@
 │   Snowflake  ·  dbt Core  ·  Cortex Semantic Views  ·  Power BI            │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-  CI/CD ─── jmyers911mm/museum-dbt ─── PR gate ─── GitHub Actions dbt-ci.yml
+  CI/CD ─── jmyers911mm/ns11mm-dbt ─── PR gate ─── GitHub Actions dbt-ci.yml
             SQLFluff  ·  dbt_project_evaluator  ·  no direct pushes to main
 
 

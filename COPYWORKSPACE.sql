@@ -1,2 +1,2 @@
 COPY FILES INTO @MUSEUM_DW_DEV.PUBLIC.WORKSPACE_EXPORT
-FROM 'snow://workspace/MUSEUM_DW_DEV.PUBLIC."museum-dbt"/versions/live/';
+FROM 'snow://workspace/MUSEUM_DW_DEV.PUBLIC."ns11mm-dbt"/versions/live/';

@@ -1,22 +1,22 @@
-CREATE OR REPLACE SEMANTIC VIEW MUSEUM_DW_PROD.GOLD.SV_MARKETING_PERFORMANCE
+CREATE OR REPLACE SEMANTIC VIEW NS11MM_DW_PROD.GOLD.SV_MARKETING_PERFORMANCE
 
   TABLES (
-    ad_performance AS MUSEUM_DW_PROD.GOLD.FCT_DIGITAL_AD_PERFORMANCE
+    ad_performance AS NS11MM_DW_PROD.GOLD.FCT_DIGITAL_AD_PERFORMANCE
       WITH SYNONYMS ('ads', 'digital ads', 'paid media')
       COMMENT = 'Unified digital advertising performance across Google Ads and Meta platforms',
-    website_traffic AS MUSEUM_DW_PROD.GOLD.FCT_WEBSITE_TRAFFIC
+    website_traffic AS NS11MM_DW_PROD.GOLD.FCT_WEBSITE_TRAFFIC
       WITH SYNONYMS ('web traffic', 'GA sessions', 'website sessions')
       COMMENT = 'Daily website traffic aggregated by channel, campaign, page category, and device',
-    email_campaigns AS MUSEUM_DW_PROD.GOLD.FCT_CAMPAIGN_PERFORMANCE
+    email_campaigns AS NS11MM_DW_PROD.GOLD.FCT_CAMPAIGN_PERFORMANCE
       WITH SYNONYMS ('email', 'email marketing', 'SFMC campaigns')
       COMMENT = 'Email campaign performance with open/click/bounce/unsubscribe rates',
-    channel_summary AS MUSEUM_DW_PROD.GOLD.FCT_MARKETING_CHANNEL_SUMMARY
+    channel_summary AS NS11MM_DW_PROD.GOLD.FCT_MARKETING_CHANNEL_SUMMARY
       WITH SYNONYMS ('cross-channel', 'all channels', 'channel comparison')
       COMMENT = 'Unified daily channel performance across all marketing channels',
-    channels AS MUSEUM_DW_PROD.GOLD.DIM_MARKETING_CHANNEL
+    channels AS NS11MM_DW_PROD.GOLD.DIM_MARKETING_CHANNEL
       PRIMARY KEY (channel_id)
       COMMENT = 'Marketing channel dimension with paid/owned/earned classification',
-    dates AS MUSEUM_DW_PROD.GOLD.DIM_DATE
+    dates AS NS11MM_DW_PROD.GOLD.DIM_DATE
       PRIMARY KEY (date_day)
       COMMENT = 'Date dimension with fiscal year context'
   )

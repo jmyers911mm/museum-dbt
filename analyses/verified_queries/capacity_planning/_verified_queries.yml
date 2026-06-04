@@ -4,7 +4,7 @@ verified_queries:
       Ticket availability for the next 7 days by date and type.
       Used by box office for real-time capacity management.
     file: availability_next_week.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION
     question: "What is ticket availability for the next week?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-008-CP-001
@@ -19,7 +19,7 @@ verified_queries:
       Time slots at Very High or Sold Out demand levels for upcoming dates.
       Triggers overflow pricing or capacity expansion decisions.
     file: sold_out_slots.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION
     question: "Which time slots are sold out or near capacity?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-008-CP-002
@@ -34,7 +34,7 @@ verified_queries:
       Historical demand patterns (avg, P90) by ticket type, day, and window.
       Baseline for capacity planning and dynamic pricing.
     file: peak_demand_benchmarks.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION
     question: "Which time slots have the highest historical demand?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-008-CP-003
@@ -49,7 +49,7 @@ verified_queries:
       Weekend vs weekday capacity utilization comparison.
       Supports differential pricing and staffing decisions.
     file: weekend_capacity_utilization.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION
     question: "How does weekend utilization compare to weekday?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-008-CP-004
@@ -64,7 +64,7 @@ verified_queries:
       Month at which each donor tier reaches 50% retention (half-life).
       Key metric for predicting donor lifecycle and renewal timing.
     file: half_life_by_tier.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_DONOR_RETENTION
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_DONOR_RETENTION
     question: "When do cohorts reach 50% retention?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-008-CP-005

@@ -119,3 +119,22 @@ models:
         description: Campaign name
         tests:
           - not_null
+
+  - name: rpt_revenue_bridge
+    description: Weekly revenue bridge with YoY comparison, budget vs actual (trailing 4-week average), and component breakdown across tickets and retail
+    meta:
+      owner: Finance & Operations
+    columns:
+      - name: week_start_date
+        description: First day of the ISO week
+        tests:
+          - not_null
+          - unique
+      - name: total_revenue_gross
+        description: Total gross revenue (tickets + retail) for the week
+        tests:
+          - not_null
+      - name: total_revenue_net
+        description: Total net revenue after discounts
+        tests:
+          - not_null

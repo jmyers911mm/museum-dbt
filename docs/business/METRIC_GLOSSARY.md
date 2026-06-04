@@ -95,6 +95,21 @@ These terms appear across many metrics, so they're defined once here.
 
 ---
 
+## Revenue Bridge
+
+| Metric | What it means | How it's calculated (plain) | Where to find it |
+| --- | --- | --- | --- |
+| **YoY total variance** | How much more (or less) revenue we earned this week versus the same week last year. | This week's gross revenue − same ISO week last year's gross revenue. | Revenue Bridge |
+| **YoY ticket / retail variance** | Breakdown of the year-over-year change by revenue stream. | Per-stream revenue this week − same stream same week last year. | Revenue Bridge |
+| **Budget vs actual variance** | How actual revenue compares to the plan (trailing 4-week average proxy). | Actual gross revenue − trailing 4-week average. | Revenue Bridge |
+| **Budget variance %** | Percentage over/under plan. | (Actual − budget) ÷ budget × 100. | Revenue Bridge |
+| **WoW total variance** | Week-over-week revenue change. | This week's gross revenue − prior week's gross revenue. | Revenue Bridge |
+| **Ticket / retail discount impact** | How discount changes drove the year-over-year revenue variance. | Change in discount amounts between this year and last year (inverted so positive = less discounting). | Revenue Bridge |
+| **Volume change (tickets / retail)** | How transaction volume drove the revenue change. | Tickets sold (or items sold) this week − same metric same week last year. | Revenue Bridge |
+| **Revenue per visitor** | Average revenue generated per admitted visitor for the week. | Total weekly gross revenue ÷ total weekly visitors. | Revenue Bridge |
+
+---
+
 ## A note on "certified" vs. ad-hoc numbers
 
 - Numbers on the dashboards above and the natural-language assistant are **certified** — they use these approved definitions.

@@ -1,8 +1,8 @@
 # SQL Style Guide
 
-Conventions for SQL in the `museum-dbt` project. These are enforced where possible by `.sqlfluff`; the rest is reviewed in PRs. Consistency here is what lets anyone on the team read anyone else's model without friction.
+Conventions for SQL in the `ns11mm-dbt` project. These are enforced where possible by `.sqlfluff`; the rest is reviewed in PRs. Consistency here is what lets anyone on the team read anyone else's model without friction.
 
-> This guide expands the "SQL Style Guide" section referenced in [CONTRIBUTING](../CONTRIBUTING.md). When the two differ, this file is authoritative; keep them linked.
+> This guide expands the "SQL Style Guide" section referenced in [CONTRIBUTING](../../CONTRIBUTING.md). When the two differ, this file is authoritative; keep them linked.
 
 ---
 
@@ -112,7 +112,7 @@ sqlfluff fix models/    # auto-fixes what it can
 
 ## Commit and PR hygiene
 
-Follow the commit prefixes from [CONTRIBUTING](../CONTRIBUTING.md#commit-messages):
+Follow the commit prefixes from [CONTRIBUTING](../../CONTRIBUTING.md#commit-messages):
 
 ```
 feat:     new model or capability
@@ -122,4 +122,4 @@ test:     add or change tests
 docs:     documentation only
 ```
 
-Keep PRs small and single-purpose. Run the [Pre-PR Checklist](../CONTRIBUTING.md#pre-pr-checklist) before opening.
+Keep PRs small and single-purpose. Run the [Pre-PR Checklist](../../CONTRIBUTING.md#pre-pr-checklist) before opening.

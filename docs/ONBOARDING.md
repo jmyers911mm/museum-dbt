@@ -1,6 +1,6 @@
 # Onboarding — Data Team
 
-A linear, day-one checklist for new contributors to the `museum-dbt` project. Work top to bottom; by the end you'll have a working personal workspace and your first successful build.
+A linear, day-one checklist for new contributors to the `ns11mm-dbt` project. Work top to bottom; by the end you'll have a working personal workspace and your first successful build.
 
 For the *why* behind any step, follow the links into [CONTRIBUTING](../CONTRIBUTING.md) and the [README](../README.md).
 
@@ -10,10 +10,10 @@ For the *why* behind any step, follow the links into [CONTRIBUTING](../CONTRIBUT
 
 Ask your lead / the CIO's office to provision these before day one:
 
-- [ ] **GitHub access** to `jmyers911mm/museum-dbt` (write access if you'll contribute)
+- [ ] **GitHub access** to `jmyers911mm/ns11mm-dbt` (write access if you'll contribute)
 - [ ] **Snowflake account** with `DBT_DEV_ROLE`
-- [ ] **A personal dev database** — `MUSEUM_DW_DEV_<YOURUSERNAME>` (created via `scripts/setup_developer_workspace.sql`, run by an admin)
-- [ ] **Read access** to `MUSEUM_DW_PROD` (for comparison only — never write to it)
+- [ ] **A personal dev database** — `NS11MM_DW_DEV_<YOURUSERNAME>` (created via `scripts/setup_developer_workspace.sql`, run by an admin)
+- [ ] **Read access** to `NS11MM_DW_PROD` (for comparison only — never write to it)
 - [ ] **Membership** in the Teams data channel (for change notices and alerts)
 - [ ] **Access to the Platform Hub** (registries, runbook, ADR log)
 
@@ -23,8 +23,8 @@ Ask your lead / the CIO's office to provision these before day one:
 
 - [ ] Skim the [README](../README.md) — focus on **Architecture**, **Data Layers**, and **Model Lineage**.
 - [ ] Read [CONTRIBUTING](../CONTRIBUTING.md) — focus on **Branch Strategy**, **Ownership Zones**, and **Change Gate Classification**.
-- [ ] Read the [SQL Style Guide](SQL_STYLE_GUIDE.md).
-- [ ] Skim [Data Classification](DATA_CLASSIFICATION.md) so you know what PII looks like before you touch it.
+- [ ] Read the [SQL Style Guide](architecture/SQL_STYLE_GUIDE.md).
+- [ ] Skim [Data Classification](architecture/DATA_CLASSIFICATION.md) so you know what PII looks like before you touch it.
 
 You don't need to memorize anything — just know where to look.
 
@@ -34,8 +34,8 @@ You don't need to memorize anything — just know where to look.
 - [ ] Install dbt with the Snowflake adapter (or use a Snowsight Workspace).
 - [ ] Clone the repo:
   ```
-  git clone https://github.com/jmyers911mm/museum-dbt.git
-  cd museum-dbt
+  git clone https://github.com/jmyers911mm/ns11mm-dbt.git
+  cd ns11mm-dbt
   ```
 - [ ] Install project packages:
   ```
@@ -55,7 +55,7 @@ museum_dbt:
       account: ""              # ask your lead for the account locator
       user: ""                 # your Snowflake username
       role: DBT_DEV_ROLE
-      database: MUSEUM_DW_DEV_<YOUR_USERNAME>   # ← personal database
+      database: NS11MM_DW_DEV_<YOUR_USERNAME>   # ← personal database
       warehouse: DBT_DEV_WH
       schema: SILVER
       threads: 4
@@ -76,7 +76,7 @@ museum_dbt:
   ```
 - [ ] Confirm it worked — you should see your models and passing tests. Spot-check a table in Snowsight:
   ```sql
-  SELECT COUNT(*) FROM MUSEUM_DW_DEV_<YOUR_USERNAME>.GOLD.FCT_DAILY_OPERATIONS;
+  SELECT COUNT(*) FROM NS11MM_DW_DEV_<YOUR_USERNAME>.GOLD.FCT_DAILY_OPERATIONS;
   ```
 
 If the build fails, check the [RUNBOOK](../RUNBOOK.md) common-failures section before asking — it covers the usual suspects (freshness, circuit breaker, full-refresh).

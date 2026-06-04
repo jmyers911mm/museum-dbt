@@ -31,7 +31,7 @@ models:
       +materialized: view
       +schema: SILVER
       +tags: ['daily', 'critical']
-      +query_tag: 'dbt_museum_staging'
+      +query_tag: 'dbt_ns11mm_staging'
       +group: staging
     silver:
       +materialized: incremental
@@ -39,7 +39,7 @@ models:
       +incremental_strategy: merge
       +on_schema_change: append_new_columns
       +tags: ['daily', 'critical']
-      +query_tag: 'dbt_museum_silver'
+      +query_tag: 'dbt_ns11mm_silver'
       +copy_grants: true
       +transient: true
       +group: silver
@@ -49,7 +49,7 @@ models:
       +incremental_strategy: merge
       +on_schema_change: append_new_columns
       +tags: ['daily', 'critical']
-      +query_tag: 'dbt_museum_gold'
+      +query_tag: 'dbt_ns11mm_gold'
       +copy_grants: true
       +post-hook:
         - "GRANT SELECT ON {{ this }} TO ROLE POWERBI_ROLE"
@@ -68,7 +68,7 @@ models:
       +materialized: table
       +schema: ML_FEATURES
       +tags: ['daily', 'non-critical']
-      +query_tag: 'dbt_museum_ml_features'
+      +query_tag: 'dbt_ns11mm_ml_features'
       +transient: true
       +group: ml_features
       +access: public
@@ -79,4 +79,4 @@ snapshots:
   museum_dbt:
     +target_schema: SILVER
     +tags: ['daily', 'non-critical']
-    +query_tag: 'dbt_museum_snapshots'
+    +query_tag: 'dbt_ns11mm_snapshots'

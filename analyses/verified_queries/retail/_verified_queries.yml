@@ -4,7 +4,7 @@ verified_queries:
       Retail revenue, items sold, and AOV by product category.
       Core gift shop performance metric for merchandising decisions.
     file: retail_by_category.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "What are retail sales by product category?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-004-RT-001
@@ -19,7 +19,7 @@ verified_queries:
       Product-level revenue and volume with price tier classification.
       Identifies best sellers and informs reorder decisions.
     file: top_selling_products.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "What are the top selling products?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-004-RT-002

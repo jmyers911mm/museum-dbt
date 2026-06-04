@@ -4,7 +4,7 @@ verified_queries:
       Average lifetime value by customer segment (Known Member, Identified
       Visitor, Anonymous). Core metric for identity resolution ROI.
     file: ltv_by_customer_segment.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "What is average lifetime value by customer segment?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-005-MS-001
@@ -19,7 +19,7 @@ verified_queries:
       Customer count and total LTV by value tier (Platinum/Gold/Silver/Bronze).
       Supports donor stewardship prioritization.
     file: ltv_by_tier.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "How many customers are in each LTV tier?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-005-MS-002
@@ -34,7 +34,7 @@ verified_queries:
       Customer count by membership type and segment.
       Tracks membership program health and growth.
     file: customers_by_membership_type.sql
-    semantic_view: MUSEUM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
+    semantic_view: NS11MM_DW_PROD.GOLD.SV_MUSEUM_OPERATIONS
     question: "How many customers by membership type?"
     stakeholder_owner: Jeremy Myers
     adm_reference: ADR-005-MS-003

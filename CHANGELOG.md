@@ -1,6 +1,27 @@
 # Changelog
 
-All notable changes to the museum-dbt project will be documented in this file.
+All notable changes to the ns11mm-dbt project will be documented in this file.
+
+## [2.10.0] - 2026-06-04
+
+### Infrastructure — Project Rename & Environment Restructure
+- Renamed project from `museum-dbt` to `ns11mm-dbt` across all documentation and references
+- Renamed production database from `MUSEUM_DW_PROD` to `NS11MM_DW_PROD` (cloned + dropped old)
+- `MUSEUM_DW_DEV` retained as shared dev database and workspace host
+- Created personal dev database `NS11MM_DW_DEV_JMYERS`
+- Created personal dev database `NS11MM_DW_DEV_KRAMSEY`
+- Updated all verified query SQL files and YAML metadata to reference `ns11mm_dw_prod`
+- Updated macros (`create_ticket_demand_forecast`, `sync_verified_queries`) with new database names
+- Updated `dbt_project.yml` query tags from `dbt_museum_*` to `dbt_ns11mm_*`
+- Updated `profiles.yml` targets to new database names
+
+### Documentation
+- Rewrote `CONTRIBUTING.md` with expanded Environment Architecture section explaining personal dev spaces, the relationship between shared dev / personal dev / prod, and the full release process
+- Fixed broken relative links across `docs/` (incorrect paths to `architecture/` subdirectory)
+- Updated all GitHub repo references from `museum-dbt` to `ns11mm-dbt`
+- Updated `SNOWFLAKE_SETTINGS.md` database inventory
+- Added developer provisioning SQL script to `CONTRIBUTING.md`
+- Added current personal dev environments table
 
 ## [2.9.0] - 2026-06-03
 
@@ -52,8 +73,16 @@ All notable changes to the museum-dbt project will be documented in this file.
 - `models/exposures.yml` — dbt exposures defining downstream consumers (Power BI, Cortex Agent, ML pipelines)
 
 ### Changed
-- Model count: 56 → 71 (15 new models)
+- Model count: 56 → 72 (16 new models)
 - `CODEOWNERS` expanded with ownership paths for verified queries and documentation
+
+## [2.9.1] - 2026-06-03
+
+### Added
+- `rpt_revenue_bridge` — weekly revenue bridge report with three views: budget vs actual (trailing 4-week average), year-over-year comparison, and component breakdown across tickets and retail. Includes WoW change, discount impact decomposition, and volume drivers.
+
+### Changed
+- Model count: 71 → 72
 
 ---
 

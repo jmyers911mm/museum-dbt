@@ -23,7 +23,7 @@ If you only read one thing, read the row in the table below that matches who you
 
 Documentation lives in **two** places. This map links across both so you never have to guess.
 
-### 1. This GitHub repository (`jmyers911mm/museum-dbt`)
+### 1. This GitHub repository (`jmyers911mm/ns11mm-dbt`)
 The **technical source of truth** — the dbt project, its tests, lineage, and the docs that engineers and analysts need to build and maintain it.
 
 | Document | Audience | Purpose |
